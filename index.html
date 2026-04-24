@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Aleas Referenzen</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="header">
+    <img src="images/logo.png" class="logo">
+    <h1>Aleas Referenzen</h1>
+  </div>
+
+  <div class="filters">
+
+    <div class="filter-group" data-group="Author">
+      <h2>Author</h2>
+      <div class="buttons"></div>
+    </div>
+
+    <div class="filter-group" data-group="Location">
+      <h2>Location</h2>
+      <div class="buttons"></div>
+    </div>
+
+    <div class="filter-group" data-group="Typology">
+      <h2>Typology</h2>
+      <div class="buttons"></div>
+    </div>
+
+    <div class="filter-group" data-group="Elements">
+      <h2>Elements</h2>
+      <div class="buttons"></div>
+    </div>
+
+    <div class="filter-group" data-group="Material">
+      <h2>Material</h2>
+      <div class="buttons"></div>
+    </div>
+
+    <div class="filter-group more-filter" data-group="Wer hats mir gezeigt?">
+      <h2>Wer hats mir gezeigt?</h2>
+      <div class="buttons"></div>
+    </div>
+
+    <div class="filter-group more-filter" data-group="Style">
+      <h2>Style</h2>
+      <div class="buttons"></div>
+    </div>
+
+    <div class="filter-group more-filter" data-group="Form">
+      <h2>Form</h2>
+      <div class="buttons"></div>
+    </div>
+
+    <div class="filter-group more-filter" data-group="Color">
+      <h2>Color</h2>
+      <div class="buttons"></div>
+    </div>
+
+    <div class="filter-group more-filter" data-group="Other">
+      <h2>Other</h2>
+      <div class="buttons"></div>
+    </div>
+
+  </div>
+
+  <button id="moreButton" class="more-button">...more</button>
+
+  <div class="navigation">
+    <button onclick="prevMatch()">← previous</button>
+    <button onclick="nextMatch()">next →</button>
+  </div>
+
+  <div class="gallery">
+
+    <div class="item" data-tags="sink concrete white detail wood 127af france paris bathroom tiles">
+      <img src="images/127af_waschbecken_1.jpeg">
+      <p>127af — Sink</p>
+    </div>
+
+    <div class="item" data-tags="le-corbusier cabin france coast wood house interior">
+      <img src="images/le-corbusier_cabanon_1.jpg">
+      <p>Le Corbusier — Cabanon</p>
+    </div>
+
+    <div class="item" data-tags="le-corbusier cabin france wood house bathroom metal sink">
+      <img src="images/le-corbusier_cabanon_2.jpg">
+      <p>Le Corbusier — Cabanon</p>
+    </div>
+
+    <div class="item" data-tags="le-corbusier cabin france wood house interior">
+      <img src="images/le-corbusier_cabanon_3.webp">
+      <p>Le Corbusier — Cabanon</p>
+    </div>
+
+    <div class="item" data-tags="sink metal france herbst-rene white detail">
+      <img src="images/René Herbst_Waschbecken_1.jpg">
+      <p>René Herbst — Sink</p>
+    </div>
+
+    <div class="item" data-tags="stair structure denmark spiral-stair tower exner-inger-johannes church">
+      <img src="images/Exner-Inger-und-Exner-Johannes_Noerrelandskirche-Holstebro-kirche.jpeg">
+      <p>Exner Inger & Johannes — Church</p>
+    </div>
+
+    <div class="item" data-tags="kindergarten concrete italy circular pavilion courtyard vaccaro-giuseppe">
+      <img src="images/Vaccaro-Giuseppe_Kindergarten-Piacenza.jpg">
+      <p>Vaccaro Giuseppe — Kindergarten, Piacenza</p>
+    </div>
+
+     <div class="item" data-tags="belgium pavilion de-vylder-vinck-taillieu concrete brick columns">
+      <img src="images/DeVylder-Vinck-Taillieu_Podium-Pile-Pavilion_pavillon.jpeg">
+      <p>DeVylder Vinck Taillieu — Podium-Pile-Pavilion</p>
+    </div>
+
+       <div class="item" data-tags="tschumi-bernard ich-war-da france paris pavilion metal red park">
+      <img src="images/Tschumi-Bernard_Parc-de-la-Villette-Paris_park.jpg">
+      <p>Tschumi Bernard — Parc de la Villette </p>
+    </div>
+
+       <div class="item" data-tags="tschumi-bernard france ich-war-da paris pavilion metal red park concept representation">
+      <img src="images/Tschumi-Bernard_Parc-de-la-Villette-Paris_darstellung.jpeg">
+      <p>Tschumi Bernard — Parc de la Villette </p>
+    </div>
+
+       <div class="item" data-tags="piano-renzo ich-war-da basel switzerland museum glass stone">
+      <img src="images/Piano-Renzo_Fondation-Beyeler-Riehen_museum.jpeg">
+      <p>Renzo Piano — Fondation Beyeler </p>
+    </div>
+
+       <div class="item" data-tags="piano-renzo ich-war-da paris france glass roof organic metal facade">
+      <img src="images/Piano-Renzo_Pathe-Foundation-Paris_gebaeude.jpg">
+      <p>Renzo Piano — Pathe Foundation </p>
+    </div>
+
+       <div class="item" data-tags="matte-trucco ich-war-da turin italy concrete factory roof industrial ramp circulation metal facade">
+      <img src="images/Matte-Trucco-Giacomo_Fiat-Lingotto-Turin.jpeg">
+      <p>Matte Trucco Giacomo — fiat werk </p>
+    </div>
+
+       <div class="item" data-tags="matte-trucco ich-war-da turin italy concrete factory industrial tragwerk ramp circulation metal">
+      <img src="images/Matte-Trucco-Giacomo_Fiat-Lingotto-Turin_struktur.jpeg">
+      <p>Matte Trucco Giacomo — fiat werk </p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+
+<footer class="disclaimer">
+  <p>This website is a personal, non-commercial reference archive.</p>
+  <p>All images remain the property of their respective authors. If you are the copyright holder of any image and wish it to be removed, please contact me and it will be taken down immediately.</p>
+</footer> </body>
+</html>

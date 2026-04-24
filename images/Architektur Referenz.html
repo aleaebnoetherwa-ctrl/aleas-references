@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Architektur Referenz</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Meine Architektur Referenz</h1>
+
+  <div class="filters">
+    <button data-tag="waschbecken">waschbecken</button>
+    <button data-tag="le-corbusier">le-corbusier</button>
+    <button data-tag="cabanon">cabanon</button>
+    <button data-tag="holz">holz</button>
+    <button data-tag="rot">rot</button>
+    <button data-tag="weiss">weiss</button>
+    <button data-tag="wohnhaus">wohnhaus</button>
+    <button data-tag="metall">metall</button>
+    <button data-tag="detail">detail</button>
+  </div>
+
+  <div class="gallery">
+
+  <div class="item" data-tags="waschbecken beton weiss detail holz">
+    <img src="images/127af_waschbecken_1.jpeg">
+    <p>127af Waschbecken</p>
+  </div>
+
+  <div class="item" data-tags="le-corbusier cabanon holz wohnhaus innen">
+    <img src="images/le-corbusier_cabanon_1.jpg">
+    <p>Le Corbusier — Cabanon</p>
+  </div>
+
+  <div class="item" data-tags="le-corbusier cabanon holz wohnhaus">
+    <img src="images/le-corbusier_cabanon_2.jpg">
+    <p>Le Corbusier — Cabanon</p>
+  </div>
+
+  <div class="item" data-tags="le-corbusier cabanon holz wohnhaus innen metall waschbecken">
+    <img src="images/le-corbusier_cabanon_3.webp">
+    <p>Le Corbusier — Cabanon</p>
+  </div>
+
+  <div class="item" data-tags="waschbecken metall weiss detail">
+    <img src="images/René Herbst_Waschbecken_1.jpg">
+    <p>René Herbst — Waschbecken</p>
+  </div>
+
+</div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
+<div class="navigation">
+  <button onclick="prevMatch()">← vorheriger Treffer</button>
+  <button onclick="nextMatch()">nächster Treffer →</button>
+</div>

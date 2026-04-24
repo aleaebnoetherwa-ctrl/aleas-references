@@ -1,0 +1,195 @@
+/* ----------- BASE ----------- */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 30px 160px;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+/* ----------- FILTERS ----------- */
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group h2 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.filter-group h3 {
+  font-size: 14px;
+  margin: 12px 0 6px;
+  font-weight: normal;
+  opacity: 0.7;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+button {
+  padding: 6px 10px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background: white;
+}
+
+button:hover {
+  background: #eee;
+}
+
+.selected {
+  background: black;
+  color: white;
+}
+
+/* ----------- NAVIGATION ----------- */
+
+.navigation {
+  margin-bottom: 20px;
+}
+
+.navigation button {
+  margin-right: 10px;
+}
+
+/* ----------- MASONRY GALLERY ----------- */
+
+.gallery {
+  column-count: 5;
+  column-gap: 0;
+}
+
+/* ----------- ITEMS ----------- */
+
+.item {
+  position: relative;
+  break-inside: avoid;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* ----------- IMAGES (ORIGINAL RATIO) ----------- */
+
+.item img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: unset;
+}
+
+/* ----------- HOVER LABEL ----------- */
+
+.item p {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  margin: 0;
+  padding: 4px 6px;
+  font-size: 12px;
+  background: white;
+  color: black;
+  opacity: 0;
+  transition: 0.2s;
+  pointer-events: none;
+}
+
+/* ----------- HOVER EFFECT ----------- */
+
+.item:hover img {
+  opacity: 0.5;
+}
+
+.item:hover p {
+  opacity: 1;
+}
+
+/* ----------- FILTER (HIDE NON-MATCHES) ----------- */
+
+.dim {
+  display: none;
+}
+
+/* ----------- RESPONSIVE ----------- */
+
+@media (max-width: 1200px) {
+  .gallery {
+    column-count: 4;
+  }
+}
+
+@media (max-width: 900px) {
+  .gallery {
+    column-count: 3;
+  }
+}
+
+@media (max-width: 600px) {
+  .gallery {
+    column-count: 2;
+  }
+
+  .filters {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ----------- HEADER ----------- */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+}
+
+/* ----------- MORE FILTERS ----------- */
+
+.more-filter {
+  display: none;
+}
+
+.filters.show-more .more-filter {
+  display: flex;
+}
+
+.more-button {
+  margin-bottom: 30px;
+}
+
+.tag-spacer {
+  width: 100%;
+  height: 14px;
+}
+
+.disclaimer {
+  margin-top: 80px;
+  padding-top: 10px;
+  font-size: 11px;
+  color: #999;
+  font-family: inherit;
+}
+
+.disclaimer p {
+  margin: 2px 0;
+}
