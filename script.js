@@ -167,7 +167,7 @@ image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1500971153/vihw
   tags: ["paris", "france", "facade", "glass", "concrete", "ramp", "bruther", "baukunst", "student-housing", "parking"]
 },
 {
-  image: "images/bruther-baukunst-filip-dujardin-maxime-delvaux-student-residence-and-reversible-car-park_stairs.jpeg",
+  image: "https://images/bruther-baukunst-filip-dujardin-maxime-delvaux-student-residence-and-reversible-car-park_stairs.jpeg",
        source: "https://divisare.com/projects/434105-bruther-baukunst-filip-dujardin-maxime-delvaux-student-residence-and-reversible-car-park",
   title: "Bruther + Baukunst  —  Reversible Car Park Paris",
   tags: ["paris", "france", "concrete", "spiral-stair", "stair", "bruther", "baukunst"]
@@ -371,8 +371,8 @@ title: "Buchner Bründler  —  Stadterle Basel",
     tags: ["matte-trucco", "ich-war-da", "turin", "italy", "concrete", "factory", "roof", "industrial", "ramp", "circulation", "metal", "facade"]
   },
   {
-    image: "https://www.old-design.com/wp-content/uploads/photo-gallery/imported_from_media_libray/IMG_2784.jpg?bwg=1745765238",
-      source: "https://www.old-design.com/lingotto-usine-fiat-a-turin-de-giacomo-matte-trucco-1923/#bwg7/90o",
+    image: "https://64.media.tumblr.com/3543ffc5a130f579f265ff9ae8ce8f7a/tumblr_p8ues7obCy1udgrilo1_500.jpg",
+      source: "https://architectureandfilm.com/post/174088772131/fiat-lingotto-factory-turin-matté-trucco-1923",
     title: "Giacomo Matté-Trucco — Fiat Lingotto",
     tags: ["matte-trucco", "ich-war-da", "turin", "italy", "concrete", "factory", "industrial", "structure", "ramp", "circulation", "metal"]
   },
