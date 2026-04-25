@@ -3,145 +3,395 @@
 ========================= */
 
 const items = [
+
+{
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1540757722/yqw2dugrsjqcgt7pt6ur/peter-zumthor-august-fischer-caplutta-sogn-benedetg.jpg",
+  source: "https://divisare.com/projects/399322-peter-zumthor-august-fischer-caplutta-sogn-benedetg",
+  title: "Peter Zumthor  —  Caplutta Sogn Benedetg Sumvitg",
+  tags: ["mountains", "switzerland", "church", "wood", "gta", "ich-war-da", "window", "floor", "beam", "furniture", "hall", "ceiling", "symmetrical", "zumthor-peter"]
+},
+{
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1540757732/ytapdpqzdujh1exgavgi/peter-zumthor-august-fischer-caplutta-sogn-benedetg.jpg",
+  source: "https://divisare.com/projects/399322-peter-zumthor-august-fischer-caplutta-sogn-benedetg",
+  title: "Peter Zumthor  —  Caplutta Sogn Benedetg Sumvitg",
+  tags: ["mountains", "switzerland", "church", "facade", "wood", "gta", "ich-war-da", "window", "stair", "concrete", "zumthor-peter", "handrail"]
+},
+{
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1540757721/cv2xvdcc2m581fb4e9ma/peter-zumthor-august-fischer-caplutta-sogn-benedetg.jpg",
+  source: "https://divisare.com/projects/399322-peter-zumthor-august-fischer-caplutta-sogn-benedet",
+  title: "Peter Zumthor  —  Caplutta Sogn Benedetg Sumvitg",
+  tags: ["mountains", "switzerland", "church", "roof", "facade", "wood", "gta", "ich-war-da", "window", "zumthor-peter"]
+},
+{
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1500971150/rfk0g4ut0prfvogw5b1q/peter-zumthor-rasmus-hjortshoj-coast-bruder-klaus-feldkapelle.jpg",
+  source: "https://divisare.com/projects/349303-peter-zumthor-rasmus-hjortshoj-bruder-klaus-feldkapelle", 
+  title: "Peter Zumthor  —  Bruder Klaus Field Chapel Mechernich",
+  tags: ["germany", "concrete", "geometric", "black", "door", "metal", "zumthor-peter", "triangular"]
+},
+{
+image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1500971153/vihwbwlyywd8sgwdobze/peter-zumthor-rasmus-hjortshoj-coast-bruder-klaus-feldkapelle.jpg",
+  source: "https://divisare.com/projects/349303-peter-zumthor-rasmus-hjortshoj-bruder-klaus-feldkapelle", 
+  title: "Peter Zumthor  —  Bruder Klaus Field Chapel Mechernich",
+  tags: ["germany", "church", "concrete", "geometric", "black", "zumthor-peter", "monolithic", "oculus"]
+},
+{
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1500971149/m1rf6rblzzleoou1txns/peter-zumthor-rasmus-hjortshoj-coast-bruder-klaus-feldkapelle.jpg",
+   source: "https://divisare.com/projects/349303-peter-zumthor-rasmus-hjortshoj-bruder-klaus-feldkapelle", 
+   title: "Peter Zumthor  —  Bruder Klaus Field Chapel Mechernich",
+  tags: ["germany", "church", "concrete", "geometric", "zumthor-peter", "monolithic"]
+},
+{
+  image: "http://www.nicolasdorvalbory.fr/content/1-home/nicolasdorvalbory_treehouse_dscf5131-ok.jpg",
+  source: "http://www.nicolasdorvalbory.fr/project:treehouse", 
+  title: "Nicolas Dorval-Bory  —  Self Built Treehouse",
+  tags: ["france", "elevated", "cabin", "wood", "structure", "foundation", "beam", "columns", "dorval-bory-nicolas", "bracing", "forest"]
+},
+{
+  image: "http://www.nicolasdorvalbory.fr/content/1-home/nicolasdorvalbory_treehouse_dscf5103-ok.jpg",
+  source: "http://www.nicolasdorvalbory.fr/project:treehouse", 
+  title: "Nicolas Dorval-Bory  —  Self Built Treehouse",
+  tags: ["france", "cabin", "roof", "window", "geometric", "wood", "black", "skylight", "glass", "fiberglass", "circular", "dorval-bory-nicolas", "forest"]
+},
+{
+  image: "http://www.nicolasdorvalbory.fr/content/1-home/nicolasdorvalbory_treehouse_dscf5092.jpg",
+  source: "http://www.nicolasdorvalbory.fr/project:treehouse", 
+  title: "Nicolas Dorval-Bory  —  Self Built Treehouse",
+  tags: ["france", "cabin", "facade", "roof", "window", "geometric", "wood", "black", "dorval-bory-nicolas", "forest"]
+},
+{
+  image: "https://64.media.tumblr.com/0020542db89643cddf592a4df8f4febd/tumblr_nzieh9fqnL1twhq1io6_1280.jpg",
+  source: "http://www.nicolasdorvalbory.fr/project:treehouse", 
+  title: "Jean-Philippe Vassal  —  Vassal House (Paillote) Niamey",
+  tags: ["alternative-living", "desert", "pavilion", "roof", "structure", "thatch", "lacaton-vassal", "sand", "wood", "straw", "circular", "niger"]
+},
+{
+  image: "https://static.wixstatic.com/media/a77b8c_775999ed2ca5e158244dd76600a6e532.png/v1/fill/w_689,h_1253,al_c,q_90,enc_avif,quality_auto/a77b8c_775999ed2ca5e158244dd76600a6e532.png",
+    source: "https://www.dropcitydoc.com/about", 
+  title: "Archigram  —  Drop City USA",
+  tags: ["alternative-living", "desert", "archigram", "structure", "geometric", "concept", "wood", "usa", "dome", "experimental", "self-built", "temporary"]
+},
+{
+  image: "https://arte-util.org/cms/wp-content/uploads/2013/12/056-drop-city-01-1590x1060.jpg",
+    source: "https://arte-util.org/projects/drop-city/", 
+  title: "Archigram  —  Drop City USA",
+  tags: ["alternative-living", "structure", "archigram", "roof", "desert", "geometric", "concept", "usa", "dome", "experimental", "self-built", "temporary"]
+},
+{
+  image: "https://primary.jwwb.nl/public/m/c/b/temp-gwewjpsuastlshqtpqee/image-high-ttcmh8.png?enable-io=true&crop=1.4369%3A1&width=1920",
+    source: "https://www.philologus.eu/kunst/villa-malaparte-capri", 
+  title: "Adalberto Libera  —  Villa Malaparte Capri",
+  tags: ["italy", "coast", "house", "geometric", "plaster", "wood", "window", "wall", "libera-adalberto"]
+},
+{
+  image: "https://primary.jwwb.nl/public/m/c/b/temp-gwewjpsuastlshqtpqee/s309sy/image-142.png?enable-io=true&width=1920",
+      source: "https://www.philologus.eu/kunst/villa-malaparte-capri", 
+  title: "Adalberto Libera  —  Villa Malaparte Capri",
+  tags: ["italy", "coast", "house", "brick", "stone", "geometric", "red", "roof", "facade", "stair", "libera-adalberto", "cubic"]
+},
   {
-  image: "images/Enzmann-Fischer-Partner_Zollhaus-Zuerich_bar.jpeg",
+  image: "https://cdn.archilovers.com/projects/b_730_2aec3267-143c-43d1-9fc9-a665dbf1bb0a.jpg",
+      source: "https://www.archilovers.com/projects/12125/new-monte-rosa-hut.html", 
+  title: "Bearth & Deplazes  —  Monte Rosa Hütte",
+  tags: ["mountains", "switzerland", "cabin", "geometric", "columns", "interior", "furniture", "wood", "deplazes-bearth"]
+},
+  {
+  image: "https://cdn.archilovers.com/projects/b_730_933d5e9b-d60c-44cb-bfb3-47cf428d58d8.jpg",
+        source: "https://www.archilovers.com/projects/12125/new-monte-rosa-hut.html", 
+  title: "Bearth & Deplazes  —  Monte Rosa Hütte",
+  tags: ["mountains", "switzerland", "cabin", "facade", "roof", "structure", "metal", "geometric", "deplazes-bearth", "reflective"]
+},
+{
+  image: "https://www.centrepompidou.fr/fileadmin/_processed_/2/b/csm_dossier_architecture-centre-pompidou_visibilite-4-3-jaune_1ccb89aef3.jpg",
+          source: "https://www.centrepompidou.fr/fr/offre-aux-professionnels/enseignants/dossiers-ressources-sur-lart/larchitecture-du-centre-pompidou/image-et-identite", 
+  title: "Renzo Piano + Richard Rogers  —  Centre Pompidou Paris,  Le jaune pour l'électricité",
+  tags: ["france", "piano-renzo", "paris", "museum", "metal", "ich-war-da", "yellow", "concept", "green", "rogers-richard", "building-services", "electricity"]
+},
+  {
+  image: "https://www.centrepompidou.fr/fileadmin/_processed_/4/8/csm_dossier_architecture-centre-pompidou_visibilite-4-3-vert_9232b31ead.jpg",
+            source: "https://www.centrepompidou.fr/fr/offre-aux-professionnels/enseignants/dossiers-ressources-sur-lart/larchitecture-du-centre-pompidou/image-et-identite", 
+  title: "Renzo Piano + Richard Rogers  —  Centre Pompidou Paris, Le vert pour l'eau",
+  tags: ["france", "piano-renzo", "pipes", "paris", "museum", "green", "metal", "ich-war-da", "concept", "facade","building-services", "structure", "green", "rogers-richard"]
+},
+ {
+  image: "https://www.centrepompidou.fr/fileadmin/_processed_/5/4/csm_dossier_architecture-centre-pompidou_visibilite-4-3-bleu_8c0f4b9d8e.jpg",
+   source: "https://www.centrepompidou.fr/fr/offre-aux-professionnels/enseignants/dossiers-ressources-sur-lart/larchitecture-du-centre-pompidou/image-et-identite", 
+  title: "Renzo Piano + Richard Rogers  —  Centre Pompidou Paris, Le bleu pour l'air",
+  tags: ["france", "piano-renzo", "pipes", "paris", "museum", "metal", "ich-war-da", "roof", "blue", "concept", "building-services", "rogers-richard"]
+},
+{
+  image: "https://www.centrepompidou.fr/fileadmin/_processed_/4/9/csm_dossier_architecture-centre-pompidou_visibilite-2_1ec908840a.jpg",
+   source: "https://www.centrepompidou.fr/fr/offre-aux-professionnels/enseignants/dossiers-ressources-sur-lart/larchitecture-du-centre-pompidou/image-et-identite", 
+  title: "Renzo Piano + Richard Rogers  —  Centre Pompidou Paris",
+  tags: ["france", "circulation", "piano-renzo", "paris", "museum", "facade", "structure", "escalator", "glass", "metal", "ich-war-da", "rogers-richard"]
+},
+{
+  image: "https://www.centrepompidou.fr/fileadmin/_processed_/5/e/csm_dossier_architecture-centre-pompidou_visibilite-4.3.02_7e6fbee897.jpg",
+     source: "https://www.centrepompidou.fr/fr/offre-aux-professionnels/enseignants/dossiers-ressources-sur-lart/larchitecture-du-centre-pompidou/image-et-identite",
+  title: "Renzo Piano + Richard Rogers  —  Centre Pompidou Paris",
+  tags: ["france", "circulation", "colorful", "pipes", "piano-renzo", "paris", "museum", "facade", "structure", "rogers-richard", "building-services"]
+},
+{
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1696591627/fee87518-ee62-46ea-91af-6351519227a8/r-architecture-maxime-delvaux-stephane-chalmeau-p-r-car-park.jpg",
+  source: "https://divisare.com/projects/487677-r-architecture-maxime-delvaux-stephane-chalmeau-p-r-car-park",
+  title: "R Architecture  —  Parking Vertou",
+  tags: ["france", "parking", "ramp", "concrete", "circulation", "roof", "circular", "r-architecture"]
+},
+{
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1696591605/90c543f8-67d1-424c-acea-5768520e97ce/r-architecture-maxime-delvaux-stephane-chalmeau-p-r-car-park.jpg",
+    source: "https://divisare.com/projects/487677-r-architecture-maxime-delvaux-stephane-chalmeau-p-r-car-park",
+  title: "R Architecture  —  Parking Vertou",
+  tags: ["france", "parking", "ramp", "concrete", "circulation", "structure", "columns", "r-architecture", "slaps"]
+},
+ {
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1696591603/ddb77ab7-fa19-4e3c-b9ba-74fb7393bba1/r-architecture-maxime-delvaux-stephane-chalmeau-p-r-car-park.jpg",
+    source: "https://divisare.com/projects/487677-r-architecture-maxime-delvaux-stephane-chalmeau-p-r-car-park",
+  title: "R Architecture  —  Parking Vertou",
+  tags: ["france", "parking", "ramp", "concrete", "circular", "white", "circulation", "r-architecture"]
+},
+  {
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1696591606/a8858608-d424-429d-afd1-2dcdce1aecf4/r-architecture-maxime-delvaux-stephane-chalmeau-p-r-car-park.jpg",
+    source: "https://divisare.com/projects/487677-r-architecture-maxime-delvaux-stephane-chalmeau-p-r-car-park",
+  title: "R Architecture  —  Parking Vertou",
+  tags: ["france", "parking", "facade", "columns", "r-architecture", "net", "tensioned", "membran"]
+},
+ {
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1607005236/jxin3f5ldrf8bvejcnzc/bruther-baukunst-filip-dujardin-maxime-delvaux-student-residence-and-reversible-car-park.jpg",
+     source: "https://divisare.com/projects/434105-bruther-baukunst-filip-dujardin-maxime-delvaux-student-residence-and-reversible-car-park",
+  title: "Bruther + Baukunst  —  Reversible Car Park Paris",
+  tags: ["paris", "france", "metal", "bruther", "baukunst", "parking", "lampe"]
+},
+ {
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1607005233/s8gjxgrg7dcrogd5bdg9/bruther-baukunst-filip-dujardin-maxime-delvaux-student-residence-and-reversible-car-park.jpg",
+       source: "https://divisare.com/projects/434105-bruther-baukunst-filip-dujardin-maxime-delvaux-student-residence-and-reversible-car-park",
+  title: "Bruther + Baukunst  —  Reversible Car Park Paris",
+  tags: ["paris", "france", "facade", "glass", "concrete", "ramp", "bruther", "baukunst", "student-housing", "parking"]
+},
+{
+  image: "images/bruther-baukunst-filip-dujardin-maxime-delvaux-student-residence-and-reversible-car-park_stairs.jpeg",
+       source: "https://divisare.com/projects/434105-bruther-baukunst-filip-dujardin-maxime-delvaux-student-residence-and-reversible-car-park",
+
+  title: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1607005228/erphfd3uzbagyvhwj9e9/bruther-baukunst-filip-dujardin-maxime-delvaux-student-residence-and-reversible-car-park.jpg",
+  tags: ["paris", "france", "concrete", "spiral-stair", "stair", "bruther", "baukunst"]
+},
+  {
+  image: "https://www.enzmannfischer.ch/wp-content/uploads/2016/01/243_WGZ_HP_01_FO_Au_ALa_27.jpg",
+     source: "https://divisare.com/projects/448724-enzmann-fischer-partner-ag-annett-landsmann-zollhaus",
   title: "Enzmann Fischer Partner  —  Zollhaus Zürich",
   tags: ["switzerland", "in-noisy-places", "zurich", "enzmann-fischer-partner", "bar"]
 },
   {
-  image: "images/Enzmann-Fischer-Partner_Zollhaus-Zuerich_hallenwohnen.jpeg",
-  title: "Enzmann Fischer Partner  —  Zollhaus Zürich, Hallenwohnen",
+    image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1633619723/grjkr7fhzg4c0iishz8r/enzmann-fischer-partner-ag-annett-landsmann-zollhaus.jpg",
+   source: "https://divisare.com/projects/448724-enzmann-fischer-partner-ag-annett-landsmann-zollhaus",
+     title: "Enzmann Fischer Partner  —  Zollhaus Zürich",
+  tags: ["switzerland", "zurich", "enzmann-fischer-partner", "chain-link-fence", "staircase"]
+},
+      {
+  image: "https://www.enzmannfischer.ch/wp-content/uploads/2016/01/243_WGZ_HP_01_FO_Au_ALa_21.jpg",
+  title: "https://www.enzmannfischer.ch/projekt/zollhaus/",
   tags: ["switzerland", "enzmann-fischer-partner", "alternative-living", "hall"]
 },
 {
   image: "images/Enzmann-Fischer-Partner_Zollhaus-Zuerich_halle.jpeg",
+ source: "https://divisare.com/projects/448724-enzmann-fischer-partner-ag-annett-landsmann-zollhaus",
   title: "Enzmann Fischer Partner  —  Zollhaus Zürich",
   tags: ["switzerland", "zurich", "enzmann-fischer-partner", "hall", "mixed-use", "stair", "gallery"]
 },
 {
-  image: "images/Enzmann-Fischer-Partner_Zollhaus-Zuerich.jpg",
+  image: "https://architekturpreis.ch/wp-content/uploads/2024/11/architekturpreis-xif7af.jpg",
+   source: "https://architekturpreis.ch/archiv/2022/zollhaus-zuerich-2/",
   title: "Enzmann Fischer Partner  —  Zollhaus Zürich",
-  tags: ["switzerland", "in-noisy-places", "housing", "social-housing", "facade", "enzmann-fischer-partner", "zurich", "mixed-use"]
+  tags: ["switzerland", "courtyard", "housing", "social-housing", "facade", "laubengang", "enzmann-fischer-partner", "zurich",]
 },
+
 {
-  image: "images/Buchner-Bruendler_Wohnsiedlung-Roetiboden-Waedenswil_treppe_innen.jpeg",
-  title: "Buchner Bründler  —  Wohnsiedlung Rötiboden Wädenswil",
-  tags: ["switzerland", "housing", "spiral-stair", "concrete", "apartment-interior", "buchner-bruendler", "orange"]
-},
-{
-  image: "images/Buchner-Bruendler_Wohnsiedlung-Roetiboden-Waedenswil_treppe.jpeg",
-  title: "Buchner Bründler  —  Wohnsiedlung Rötiboden Wädenswil",
-  tags: ["switzerland", "green", "housing", "spiral-stair", "concrete", "buchner-bruendler"]
+  image: "https://architekturpreis.ch/wp-content/uploads/2024/11/architekturpreis-43ebil.jpg",
+   source: "https://architekturpreis.ch/archiv/2022/zollhaus-zuerich-2/", 
+  title: "Enzmann Fischer Partner  —  Zollhaus Zürich",
+  tags: ["switzerland", "enzmann-fischer-partner", "zurich", "stair", "columns",]
+  },
+  {
+  image: "https://www.enzmannfischer.ch/wp-content/uploads/2016/01/243_WGZ_HP_01_FO_Au_ALa_08-1694x2400.jpg",
+   source: "https://www.enzmannfischer.ch/projekt/zollhaus/",
+   title: "Enzmann Fischer Partner  —  Zollhaus Zürich",
+  tags: ["switzerland", "concrete", "metal", "facade", "enzmann-fischer-partner", "zurich", "bar"]
 },
   {
-  image: "images/Buchner-Bruendler_Wohnsiedlung-Roetiboden-Waedenswil.jpg",
+  image: "https://www.enzmannfischer.ch/wp-content/uploads/2016/01/243_WGZ_HP_GIF_compressed.gif",
+   source: "https://www.enzmannfischer.ch/projekt/zollhaus/",
+   title: "Enzmann Fischer Partner  —  Zollhaus Zürich",
+  tags: ["switzerland", "concrete", "glass-bricks", "metal", "hall", "enzmann-fischer-partner", "zurich", "bar"]
+},
+{
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1633619683/rt5yjnyuw0roja5m3duc/enzmann-fischer-partner-ag-annett-landsmann-zollhaus.jpg",
+   source: "https://divisare.com/projects/448724-enzmann-fischer-partner-ag-annett-landsmann-zollhaus",
+   title: "Enzmann Fischer Partner  —  Zollhaus Zürich",
+  tags: ["switzerland", "in-noisy-places", "corrugated-something", "concrete", "metal", "housing", "social-housing", "facade", "enzmann-fischer-partner", "zurich", "mixed-use"]
+},
+{
+  image: "https://architekturpreis.ch/wp-content/uploads/formidable/2/05_247_BBarc_AuszeichnngKtZH_Paola_Corsini_04.jpg",
+   source: "https://architekturpreis.ch/wohnsiedlung-roetiboden-waedenswil/",
   title: "Buchner Bründler  —  Wohnsiedlung Rötiboden Wädenswil",
-  tags: ["switzerland", "housing", "balcony", "facade", "spiral-stair", "concrete", "buchner-bruendler"]
+  tags: ["switzerland", "housing", "spiral-stair", "concrete", "interior", "buchner-bruendler", "orange"]
+},
+{
+  image: "https://architekturpreis.ch/wp-content/uploads/formidable/2/04_247_BBarc_AuszeichnngKtZH_Paola_Corsini_29.jpg",
+  source: "https://architekturpreis.ch/wohnsiedlung-roetiboden-waedenswil/",
+  title: "Buchner Bründler  —  Wohnsiedlung Rötiboden Wädenswil",
+  tags: ["switzerland", "green", "colorful", "housing", "spiral-stair", "concrete", "buchner-bruendler"]
+},
+  {
+  image: "https://architekturpreis.ch/wp-content/uploads/formidable/2/02_247_BBarc_AuszeichnngKtZH_Rory_Gardiner_01-2.jpg",
+  source: "https://architekturpreis.ch/wohnsiedlung-roetiboden-waedenswil/",
+  title: "Buchner Bründler  —  Wohnsiedlung Rötiboden Wädenswil",
+  tags: ["switzerland", "housing", "colorful", "balcony", "facade", "spiral-stair", "concrete", "buchner-bruendler"]
 }, 
+{
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1663833319/nwvx0yoqjct6pwu2dfra/buchner-brundler-architekten-rory-gardiner-cooperative-building-stadterle.jpg",
+    source: "https://divisare.com/projects/466673-buchner-brundler-architekten-rory-gardiner-cooperative-building-stadterle",
+title: "Buchner Bründler  —  Stadterle Basel",
+  tags: ["basel", "ich-war-da", "circulation", "buchner-bruendler", "stair", "handrail", "metal"
+  ]
+},
+
+{
+  image: "https://www.buildingsocialecology.org/wp-content/uploads/2022/07/stadterle-basel-private-apartment-daisuke-hirabayashi.jpeg",
+    source: "https://www.buildingsocialecology.org/projekte/stadterle-deutsch/",
+title: "Buchner Bründler  —  Stadterle Basel",
+  tags: ["basel", "ich-war-da", "apartment-interior", "wood", "concrete", "buchner-bruendler"]
+},
   {
-  image: "images/Buchner-Bruendler_Stadterle-Basel.jpg",
-  title: "Buchner Bründler  —  Stadterle Basel",
-  tags: ["basel", "housing", "switzerland", "social-housing", "balcony", "facade", "ich-war-da", "green", "circulation", "buchner-bruendler", "laubengang"]
+  image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1663833316/k6svpubcvsf38fzhnfrv/buchner-brundler-architekten-rory-gardiner-cooperative-building-stadterle.jpg",
+      source: "https://divisare.com/projects/466673-buchner-brundler-architekten-rory-gardiner-cooperative-building-stadterle",
+      title: "Buchner Bründler  —  Stadterle Basel",
+  tags: ["basel", "housing", "corrugated-something", "switzerland", "social-housing", "balcony", "facade", "ich-war-da", "green", "circulation", "buchner-bruendler", "laubengang"]
 },
 {
-    image: "images/Maerkli-Peter_Two-Houses-Truebbach_aussen.jpg",
+    image: "http://hiddenarchitecture.net/wp-content/uploads/2018/06/01-2-1024x844.jpg",
+          source: "https://hiddenarchitecture.net/two-single-family-houses/",
     title: "Peter Märkli — Two Houses, Trübbach",
     tags: ["maerkli-peter", "switzerland", "mountains", "house", "plaster", "cubic"]
   },
 {
-  image: "images/Sauerbruch-Hutton_GSW-Headquarters-Berlin.jpg",
+  image: "https://www.sauerbruchhutton.de/cache/images/media/projekte/gsw/2567-avif@75-gsw_hero-c.jpg.avif",
+   source: "https://www.sauerbruchhutton.de/de/project/gsw",
   title: "Sauerbruch Hutton  —  GSW Headquarters Berlin",
-  tags: ["facade", "glass", "sauerbruch-hutton", "germany", "berlin", "office", "contemporary"]
+  tags: ["facade", "glass", "colorful", "sauerbruch-hutton", "germany", "berlin", "office", "contemporary"]
+},
+
+{
+  image: "https://www.sauerbruchhutton.de/cache/images/media/projekte/gsw/1600-avif%4075-gsw_annettekisling_616.jpg.avif",
+   source: "https://www.sauerbruchhutton.de/de/project/gsw",
+  title: "Sauerbruch Hutton  —  GSW Headquarters Berlin",
+  tags: ["facade", "glass", "colorful", "sauerbruch-hutton", "germany", "berlin", "office", "contemporary"]
 },
 
   {
-  image: "images/Olgiati-Valerio_Vordach-Chur.jpg",
+  image: "http://www.archipicture.eu/2%20Bilder/Schweiz/Olgiati%20Valerio/Valerio%20Olgiati%20-%20GrisonsParliamentEntrance%206sm.jpg",
+     source: "http://www.archipicture.eu/Architekten/Schweiz/Olgiati%20Valerio/Valerio%20Olgiati%20-%20GrisonsParliamentEntrance%206.html",
   title: "Valerio Olgiati  —  Vordach Chur",
   tags: ["switzerland", "concrete", "ich-war-da", "white", "ramp", "stair", "olgiati-valerio", "porch"]
 },
+{
+  image: "https://64.media.tumblr.com/6ca20f37e50575348dbe479c1531ef3a/tumblr_n67521BBLU1qat99uo4_500.jpg",
+     source: "https://www.subtilitas.site/post/86923458854/valerio-olgiati-new-entrance-to-the",
+  title: "Valerio Olgiati  —  Vordach Chur",
+  tags: ["switzerland", "concrete", "ich-war-da", "white", "handrail", "metal", "olgiati-valerio", "porch"]
+},
 
-   {
-    image: "images/127af_waschbecken_1.jpeg",
-    title: "127af — Sink",
-    tags: ["sink", "concrete", "white", "detail", "wood", "127af", "france", "paris", "bathroom", "tiles"]
+
+  {
+    image: "https://journals.openedition.org/lha/docannexe/image/4916/img-1-small480.jpg",
+         source: "https://journals.openedition.org/lha/4916",
+         title: "Le Corbusier — Cabanon",
+    tags: ["le-corbusier", "cabin", "france", "coast", "wood", "house",]
   },
   {
-    image: "images/le-corbusier_cabanon_1.jpg",
-    title: "Le Corbusier — Cabanon",
-    tags: ["le-corbusier", "cabin", "france", "coast", "wood", "house", "interior"]
-  },
-  {
-    image: "images/le-corbusier_cabanon_2.jpg",
+    image: "https://journals.openedition.org/lha/docannexe/image/4916/img-5-small480.jpg",
+    source: "https://journals.openedition.org/lha/4916",
     title: "Le Corbusier — Cabanon",
     tags: ["le-corbusier", "cabin", "france", "wood", "house", "bathroom", "metal", "sink"]
   },
   {
-    image: "images/le-corbusier_cabanon_3.webp",
+    image: "https://www.fondationlecorbusier.fr/wp-content/uploads/2022/04/le-corbusier-le-cabanon-2-flc-adagp-manuel-bougot.jpg",
+         source: "https://www.fondationlecorbusier.fr/oeuvre-architecture/realisations-cabanon-de-le-corbusier-roquebrune-cap-martin-france-1951/e",
     title: "Le Corbusier — Cabanon",
-    tags: ["le-corbusier", "cabin", "france", "wood", "house", "interior"]
+    tags: ["le-corbusier", "cabin", "colorful",  "france", "wood", "house", "interior"]
   },
   {
-    image: "images/Rene-Herbst_Waschbecken_1.jpg",
-    title: "René Herbst — Sink",
-    tags: ["sink", "metal", "france", "herbst-rene", "white", "detail"]
-  },
-  {
-    image: "images/Exner-Inger-und-Exner-Johannes_Noerrelandskirche-Holstebro-kirche.jpeg",
-    title: "Exner Inger & Johannes — Church",
+    image: "http://www.danmarks-kirker.dk/viborg/holstebro/kirke_foto/norrelands_hols_001.jpg",
+     source: "http://www.danmarks-kirker.dk/viborg/holstebro/norrelands_hols.htm",
+    title: "Inger Exner + Johannes Exner  —  Nørrelandskirken Holstebro",
     tags: ["stair", "structure", "denmark", "spiral-stair", "tower", "exner-inger-johannes", "church"]
   },
+   {
+    image: "http://www.danmarks-kirker.dk/viborg/holstebro/kirke_foto/norrelands_hols_011.jpg",
+     source: "http://www.danmarks-kirker.dk/viborg/holstebro/norrelands_hols.htm",
+    title: "Inger Exner + Johannes Exner  —  Nørrelandskirken Holstebro",
+    tags: ["stair", "lamp", "denmark", "exner-inger-johannes", "church"]
+  },
   {
-    image: "images/Vaccaro-Giuseppe_Kindergarten-Piacenza.jpg",
+    image: "http://socks-studio.com/img/blog/vaccaro-asilo-piacenza-03.jpg",
+       source: "https://socks-studio.com/2017/03/07/a-though-exercise-in-simplicity-vaccaros-kindergarten-in-piacenza/",
     title: "Vaccaro Giuseppe — Kindergarten, Piacenza",
     tags: ["kindergarten", "concrete", "italy", "circular", "pavilion", "courtyard", "vaccaro-giuseppe"]
   },
   {
-    image: "images/DeVylder-Vinck-Taillieu_Podium-Pile-Pavilion_pavillon.jpeg",
+    image: "https://images.divisare.com//images/f_auto,q_auto,w_800/v1517995670/osw9fnwjoaxsdg6rmd34/de-vylder-vinck-taillieu-jo-taillieu-jan-de-vylder-inge-vinck-filip-dujardin-podium-pile-pavilion.jpg",
+    source: "https://divisare.com/projects/379017-de-vylder-vinck-taillieu-jo-taillieu-jan-de-vylder-inge-vinck-filip-dujardin-podium-pile-pavilion",
     title: "De Vylder Vinck Taillieu — Podium-Pile-Pavilion",
     tags: ["belgium", "pavilion", "de-vylder-vinck-taillieu", "concrete", "brick", "columns"]
   },
   {
-    image: "images/Tschumi-Bernard_Parc-de-la-Villette-Paris_park.jpg",
-    title: "Bernard Tschumi — Parc de la Villette",
+    image: "https://static.dezeen.com/uploads/2022/04/parc-de-villette-bernard-tschumi-deconstructivism_dezeen_2364_hero_6.jpg",
+        source: "https://www.dezeen.com/2022/05/05/parc-de-la-villette-deconstructivism-bernard-tschumi/",
+        title: "Bernard Tschumi — Parc de la Villette",
     tags: ["tschumi-bernard", "ich-war-da", "france", "paris", "pavilion", "metal", "red", "park"]
   },
   {
-    image: "images/Tschumi-Bernard_Parc-de-la-Villette-Paris_darstellung.jpeg",
+    image: "https://www.udg.org.uk/sites/default/files/styles/900x/public/articles/images/Parc-De-La-Villette-High-Res-Plan.jpg?itok=uOh7Fdzb",
+            source: "https://www.udg.org.uk/publications/articles/parc-de-la-villette-paris",
     title: "Bernard Tschumi — Parc de la Villette",
     tags: ["tschumi-bernard", "france", "ich-war-da", "paris", "pavilion", "metal", "red", "park", "concept", "representation"]
   },
   {
-    image: "images/Piano-Renzo_Fondation-Beyeler-Riehen_museum.jpeg",
+    image: "https://arquitecturaviva.com/assets/uploads/obras/46031/av_imagen.webp?h=5ed314d8",
+                source: "https://arquitecturaviva.com/works/museo-de-la-fundacion-beyeler-riehen-9",
     title: "Renzo Piano — Fondation Beyeler",
     tags: ["piano-renzo", "ich-war-da", "basel", "switzerland", "museum", "glass", "stone"]
   },
   {
-    image: "images/Piano-Renzo_Pathe-Foundation-Paris_gebaeude.jpg",
+    image: "https://arquitecturaviva.com/assets/uploads/obras/40919/av_medium__av_83620.webp?h=0bb97f92",
+    source: "https://arquitecturaviva.com/works/fundacion-jerome-seydoux-pathe-4",
     title: "Renzo Piano — Pathé Foundation",
     tags: ["piano-renzo", "ich-war-da", "paris", "france", "glass", "roof", "organic", "metal", "facade"]
   },
   {
-    image: "images/Matte-Trucco-Giacomo_Fiat-Lingotto-Turin.jpeg",
+    image: "https://old.skyscraper.org/EXHIBITIONS/VERTICAL_URBAN_FACTORY/walkthrough_images/lingotto_web.jpg",
+    source: "https://old.skyscraper.org/EXHIBITIONS/VERTICAL_URBAN_FACTORY/fiat.php",
     title: "Giacomo Matté-Trucco — Fiat Lingotto",
     tags: ["matte-trucco", "ich-war-da", "turin", "italy", "concrete", "factory", "roof", "industrial", "ramp", "circulation", "metal", "facade"]
   },
   {
-    image: "images/Matte-Trucco-Giacomo_Fiat-Lingotto-Turin_struktur.jpeg",
+    image: "https://images.squarespace-cdn.com/content/v1/59cf7b252994ca305e64d591/1506826172365-4IMX826CBILXI7MS2J56/archaic_giacomomattetruccorenzopiano_fiat14-540x675.jpg?format=2500w",
+      source: "https://www.archaic-studio.com/journal/classics-fiat-lingotto-giacomo-matte-trucco",
     title: "Giacomo Matté-Trucco — Fiat Lingotto",
     tags: ["matte-trucco", "ich-war-da", "turin", "italy", "concrete", "factory", "industrial", "structure", "ramp", "circulation", "metal"]
   },
   {
-    image: "images/Matta-Clark-Gordon_Conical-Intersect-Paris.jpg",
+    image: "https://publicdelivery.org/wp-content/uploads/2020/01/Gordon-Matta-Clark-Conical-Intersect-1975-2-800x1219.jpg",
+    source: "https://publicdelivery.org/matta-clark-conical-intersect/",
     title: "Gordon Matta-Clark — Conical Intersect",
     tags: ["paris", "gta", "facade", "matta-clark-gordon", "representation"]
   },
   {
-    image: "images/Lacaton-Vassal-Druot-Hutin_Transformation-530-Logements-Grand-Parc-Bordeaux_balkon.jpeg",
+    image: "https://christophehutin.com/media/pages/projets/transformation-de-530-logements-batiments-gh-et-i-du-grand-parc/ac02f03b6b-1689179563/hutin-lacaton-vassal-druot-bordeaux-logement13-2480x-q90.jpg",
+    source: "https://christophehutin.com/en/projects/transformation-de-530-logements-batiments-gh-et-i-du-grand-parc",
     title: "Lacaton & Vassal, Druot, Hutin — Transformation 530 logements, Bordeaux",
     tags: ["bordeaux", "lacaton-vassal", "transformation", "france", "housing", "social-housing", "facade", "extension", "glass", "balcony"]
   },
   {
-    image: "images/Lacaton-Vassal-Druot-Hutin_Transformation-530-Logements-Grand-Parc-Bordeaux.jpg",
+    image: "https://christophehutin.com/media/pages/projets/transformation-de-530-logements-batiments-gh-et-i-du-grand-parc/b08d180ab0-1689179555/hutin-lacaton-vassal-druot-bordeaux-logement10-2480x-q90.jpg",
+    https: "//christophehutin.com/media/pages/projets/transformation-de-530-logements-batiments-gh-et-i-du-grand-parc/b08d180ab0-1689179555/hutin-lacaton-vassal-druot-bordeaux-logement10-2480x-q90.jpg",
     title: "Lacaton & Vassal, Druot, Hutin — Transformation 530 logements, Bordeaux",
     tags: ["bordeaux", "lacaton-vassal", "transformation", "france", "housing", "social-housing", "facade", "extension", "glass", "balcony"]
   }
@@ -153,29 +403,29 @@ const items = [
 ========================= */
 
 const tagGroups = {
-  "Author": ["vaccaro-giuseppe", "enzmann-fischer-partner", "buchner-bruendler", "sauerbruch-hutton", "olgiati-valerio", "maerkli-peter", "lacaton-vassal", "matta-clark-gordon", "matte-trucco", "piano-renzo", "de-vylder-vinck-taillieu", "tschumi-bernard", "exner-inger-johannes", "127af", "le-corbusier", "herbst-rene"],
+  "Author": ["vaccaro-giuseppe","zumthor-peter", "dorval-bory-nicolas", "archigram", "libera-adalberto", "deplazes-bearth", "rogers-richard", "r-architecture", "vernacular", "bruther", "baukunst", "enzmann-fischer-partner", "buchner-bruendler", "sauerbruch-hutton", "olgiati-valerio", "maerkli-peter", "lacaton-vassal", "matta-clark-gordon", "matte-trucco", "piano-renzo", "de-vylder-vinck-taillieu", "tschumi-bernard", "exner-inger-johannes", "127af", "le-corbusier", "herbst-rene"],
 
   "Location": [
-    ["france", "italy", "germany", "denmark", "belgium", "switzerland"],
+    ["france", "italy", "usa", "germany", "denmark", "belgium", "switzerland"],
     ["paris", "zurich", "bordeaux", "basel", "berlin", "turin"],
-    ["coast", "mountains"]
+    ["coast", "mountains", "desert", "forest"]
   ],
 
-  "Typology": ["church", "alternative-living", "mixed-use", "office", "house", "social-housing", "housing", "factory", "museum", "park", "pavilion", "kindergarten", "tower", "cabin"],
+  "Typology": ["church", "student-housing", "parking", "alternative-living", "mixed-use", "office", "house", "social-housing", "housing", "factory", "museum", "park", "pavilion", "kindergarten", "tower", "cabin"],
 
-  "Elements": ["bathroom", "gallery", "hall", "apartment-interior", "laubengang", "porch", "transformation", "extension", "balcony", "ramp", "roof", "facade", "columns", "courtyard", "structure", "spiral-stair", "stair", "sink", "tiles", "detail"],
+  "Elements": ["bathroom", "staircase", "handrail", "oculus", "elevated", "dome", "bracing", "pipes", "electricity", "building-services", "slaps", "gallery", "hall", "interior", "laubengang", "porch", "transformation", "extension", "balcony", "ramp", "roof", "facade", "columns", "courtyard", "structure", "door", "window", "ceiling", "floor", "wall", "corridor", "lobby", "atrium", "terrace", "garden", "garage", "basement", "attic", "elevator", "escalator", "handrail", "beam", "pillar", "foundation", "canopy", "skylight", "partition", "furniture", "lighting", "spiral-stair", "stair", "sink", "detail"],
 
-  "Material": ["concrete", "plaster", "stone", "glass", "brick", "wood", "metal"],
+  "Material": ["concrete", "glass-bricks", "corrugated-something", "chain-link-fence", "net", "sand", "earth", "plaster", "stone", "glass", "brick", "clay", "adobe", "bamboo", "thatch", "straw", "gravel", "limestone", "marble", "granite", "slate", "asphalt", "tar", "resin", "fiberglass", "carbon fiber", "plastic", "polycarbonate", "ceramic", "tile", "gypsum", "chalk", "cork", "rubber", "felt", "wool", "wood", "metal"],
 
   "Wer hats mir gezeigt?": ["gta", "ich-war-da", "self-photographed"],
 
-  "Style": ["brutalism", "contemporary", "cubic", "industrial"],
+  "Style": ["brutalism", "cubic", "tensioned", "membran", "contemporary", "cubic", "industrial"],
 
-  "Form": ["circular", "organic", "geometric", "symmetrical"],
+  "Form": ["circular", "triangular", "monolithic", "organic", "geometric", "symmetrical"],
 
-  "Color": ["red", "orange", "blue", "yellow", "green", "black", "white"],
+  "Color": ["colorful", "red", "orange", "blue", "yellow", "green", "black", "white", "reflective"],
 
-  "Other": ["representation", "in-noisy-places", "concept", "circulation"]
+  "Other": ["representation", "in-noisy-places", "concept", "circulation", "experimental", "self-built", "temporary"]
 };
 
 
@@ -205,10 +455,20 @@ function generateGallery() {
     div.className = "item";
     div.dataset.tags = item.tags.join(" ");
 
-    div.innerHTML = `
-      <img src="${item.image}">
+    const imageHtml = `
+      <img src="${item.image}" alt="${item.title}">
       <p>${item.title}</p>
     `;
+
+    if (item.source) {
+      div.innerHTML = `
+        <a href="${item.source}" target="_blank" rel="noopener noreferrer">
+          ${imageHtml}
+        </a>
+      `;
+    } else {
+      div.innerHTML = imageHtml;
+    }
 
     gallery.appendChild(div);
   });
