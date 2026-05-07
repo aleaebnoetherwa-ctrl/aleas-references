@@ -11,7 +11,10 @@
 
   <div class="header">
     <img src="images/logo.png" class="logo">
-    <h1>Aleas Referenzen</h1>
+    <h1>
+  Aleas Referenzen 
+ <span id="imageCount" class="filter-toggle">81 Referenzen filtern</span>
+</h1>
   </div>
 
   <div class="filters">
@@ -68,21 +71,23 @@
 
   </div>
 
-  <button id="moreButton" class="more-button">...more</button>
 
-  <div class="navigation">
-    <button onclick="prevMatch()">← previous</button>
-    <button onclick="nextMatch()">next →</button>
-  </div>
+  <button id="pdfButton">Export PDF</button>
+     
+  <div id="printTags"></div>
+
+<div class="gallery"></div>
 
   <div class="gallery"></div>
 
-  <script src="script.js"></script>
+
 
   <footer class="disclaimer">
     <p>This website is a personal, non-commercial reference archive.</p>
     <p>All images remain the property of their respective authors. If you are the copyright holder of any image and wish it to be removed, please contact me and it will be taken down immediately.</p>
   </footer>
+
+<script src="script.js"></script>
 
 </body>
 </html>
