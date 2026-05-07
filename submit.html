@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referenz hinzufügen</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="submit-page">
+
+  <div class="header">
+    <img src="images/logo.png" class="logo">
+    <h1>Referenz hinzufügen</h1>
+  </div>
+
+  <nav class="page-actions" aria-label="Page actions">
+    <a class="button-link" href="index.html">Back to filtering</a>
+  </nav>
+
+  <section class="submit-reference">
+    <form id="submitForm">
+      <label for="submitImage">Image URL</label>
+      <input id="submitImage" name="image" type="url" required placeholder="https://example.com/image.jpg">
+
+      <label for="submitSource">Source URL</label>
+      <input id="submitSource" name="source" type="url" placeholder="https://example.com/project-page/">
+
+      <label for="submitTitle">Title</label>
+      <input id="submitTitle" name="title" required placeholder="Author  —  Project Name">
+
+      <fieldset class="submit-tags">
+        <legend>Existing tags</legend>
+        <div id="submitTagGroups"></div>
+      </fieldset>
+
+      <fieldset class="submit-tags">
+        <legend>New tags</legend>
+        <div id="newSubmitTagRows"></div>
+        <button id="addSubmitTagRow" type="button">Add new tag</button>
+      </fieldset>
+
+      <label for="submitterName">Name</label>
+      <input id="submitterName" name="submitter_name" placeholder="optional">
+
+      <button type="submit">Submit reference</button>
+      <p id="submitStatus" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <script src="data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>

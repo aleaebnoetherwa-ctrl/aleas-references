@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item Generator</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    input, select {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 6px 10px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      background: white;
+      margin: 3px;
+    }
+
+    button.selected {
+      background: black;
+      color: white;
+    }
+
+    .tag-group {
+      margin-bottom: 20px;
+    }
+
+    .tag-group h3 {
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .new-tag-row {
+      display: grid;
+      grid-template-columns: 1fr 220px auto;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: start;
+    }
+
+    .new-tag-row button {
+      margin-top: 0;
+      height: 34px;
+    }
+
+    pre {
+      background: #f5f5f5;
+      padding: 15px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-bottom: 10px;
+    }
+
+    .output-section {
+      margin-top: 30px;
+      margin-bottom: 30px;
+    }
+
+    .helper-row {
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 20px;
+      }
+
+      .new-tag-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>New Item Generator</h2>
+
+  <label for="image">Image URL</label>
+  <input id="image" type="url" placeholder="https://example.com/image.jpg">
+
+  <label for="source">Source URL</label>
+  <input id="source" type="url" placeholder="https://example.com/project-page/">
+
+  <label for="title">Title</label>
+  <input id="title" placeholder="Author  —  Project Name">
+
+  <h3>Choose existing tags</h3>
+  <div id="tagButtons"></div>
+
+  <h3>Add new tags</h3>
+  <div id="newTagRows"></div>
+
+  <div class="helper-row">
+    <button type="button" onclick="addNewTagRow()">+ Add another new tag</button>
+  </div>
+
+  <button type="button" onclick="generate()">Generate</button>
+
+  <div class="output-section">
+    <h3>1. Item block for data.js</h3>
+    <pre id="itemOutput"></pre>
+    <button type="button" onclick="copyText('itemOutput')">Copy item block</button>
+  </div>
+
+  <div class="output-section">
+    <h3>2. New tags to add to tagGroups</h3>
+    <pre id="tagOutput"></pre>
+    <button type="button" onclick="copyText('tagOutput')">Copy new tags only</button>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    const referenceData = window.referenceData || { tagGroups: {} };
+    const { tagGroups } = referenceData;
+
+    const selectedTags = new Set();
+    let latestNewTagsOnly = "";
+
+    createTagButtons();
+
+    for (let i = 0; i < 5; i++) {
+      addNewTagRow();
+    }
+
+    function flattenTags(groupData) {
+      if (Array.isArray(groupData) && Array.isArray(groupData[0])) {
+        return groupData.flat();
+      }
+
+      return groupData;
+    }
+
+    function getCategories() {
+      return Object.keys(tagGroups);
+    }
+
+    function addNewTagRow() {
+      const wrapper = document.getElementById("newTagRows");
+
+      const row = document.createElement("div");
+      row.className = "new-tag-row";
+
+      const input = document.createElement("input");
+      input.className = "newTagInput";
+      input.placeholder = "new-tag";
+
+      const select = document.createElement("select");
+      select.className = "newTagCategory";
+
+      getCategories().forEach(category => {
+        const option = document.createElement("option");
+        option.value = category;
+        option.textContent = category;
+        select.appendChild(option);
+      });
+
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.textContent = "Remove";
+      removeButton.onclick = () => row.remove();
+
+      row.appendChild(input);
+      row.appendChild(select);
+      row.appendChild(removeButton);
+
+      wrapper.appendChild(row);
+    }
+
+    function createTagButtons() {
+      const wrapper = document.getElementById("tagButtons");
+      wrapper.innerHTML = "";
+
+      Object.entries(tagGroups).forEach(([groupName, groupData]) => {
+        const group = document.createElement("div");
+        group.className = "tag-group";
+
+        const title = document.createElement("h3");
+        title.textContent = groupName;
+        group.appendChild(title);
+
+        const tags = [...new Set(flattenTags(groupData))];
+
+        const sortedTags = tags.sort((a, b) =>
+          a.localeCompare(b, "en", { sensitivity: "base" })
+        );
+
+        sortedTags.forEach(tag => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = tag;
+          button.dataset.tag = tag;
+
+          button.addEventListener("click", () => {
+            if (selectedTags.has(tag)) {
+              selectedTags.delete(tag);
+              button.classList.remove("selected");
+            } else {
+              selectedTags.add(tag);
+              button.classList.add("selected");
+            }
+          });
+
+          group.appendChild(button);
+        });
+
+        wrapper.appendChild(group);
+      });
+    }
+
+    function cleanTag(tag) {
+      return tag
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replaceAll("ä", "ae")
+        .replaceAll("ö", "oe")
+        .replaceAll("ü", "ue")
+        .replaceAll("é", "e")
+        .replaceAll("è", "e")
+        .replaceAll("à", "a")
+        .replaceAll("ç", "c")
+        .replace(/[^a-z0-9-]/g, "")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+    }
+
+    function escapeString(value) {
+      return value
+        .replaceAll("\\", "\\\\")
+        .replaceAll('"', '\\"');
+    }
+
+    function generate() {
+      const image = document.getElementById("image").value.trim();
+      const source = document.getElementById("source").value.trim();
+      const title = document.getElementById("title").value.trim();
+
+      const newTagRows = document.querySelectorAll(".new-tag-row");
+
+      const newTagsByCategory = {};
+      const newTags = [];
+
+      newTagRows.forEach(row => {
+        const input = row.querySelector(".newTagInput");
+        const select = row.querySelector(".newTagCategory");
+
+        const cleaned = cleanTag(input.value);
+        if (!cleaned) return;
+
+        const category = select.value;
+        const existingTags = flattenTags(tagGroups[category]);
+
+        newTags.push(cleaned);
+
+        if (!newTagsByCategory[category]) {
+          newTagsByCategory[category] = [];
+        }
+
+        if (!existingTags.includes(cleaned)) {
+          newTagsByCategory[category].push(cleaned);
+        }
+      });
+
+      const allTags = [...new Set([...selectedTags, ...newTags])];
+
+      const itemResult = `{
+  image: "${escapeString(image)}",
+  source: "${escapeString(source)}",
+  title: "${escapeString(title)}",
+  tags: [${allTags.map(tag => `"${tag}"`).join(", ")}]
+},`;
+
+      const onlyNewTags = [];
+
+      Object.values(newTagsByCategory).forEach(tags => {
+        tags.forEach(tag => {
+          if (!onlyNewTags.includes(tag)) {
+            onlyNewTags.push(tag);
+          }
+        });
+      });
+
+      latestNewTagsOnly = onlyNewTags.map(tag => `"${tag}"`).join(", ");
+
+      let tagResult = "";
+
+      Object.entries(newTagsByCategory).forEach(([category, tags]) => {
+        const uniqueTags = [...new Set(tags)];
+
+        if (uniqueTags.length === 0) return;
+
+        tagResult += `${category}: ${uniqueTags.map(tag => `"${tag}"`).join(", ")}\n`;
+      });
+
+      if (!tagResult) {
+        tagResult = "No new category tags needed.";
+        latestNewTagsOnly = "";
+      }
+
+      document.getElementById("itemOutput").textContent = itemResult;
+      document.getElementById("tagOutput").textContent = tagResult;
+    }
+
+    async function copyText(id) {
+      let text;
+
+      if (id === "tagOutput") {
+        text = latestNewTagsOnly;
+      } else {
+        text = document.getElementById(id).textContent;
+      }
+
+      if (navigator.clipboard) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return;
+        } catch (error) {
+          // Fall back for local file previews or denied clipboard permissions.
+        }
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+    }
+  </script>
+
+</body>
+</html>

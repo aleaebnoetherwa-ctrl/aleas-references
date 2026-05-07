@@ -11,13 +11,22 @@
 
   <div class="header">
     <img src="images/logo.png" class="logo">
-    <h1>
-  Aleas Referenzen 
- <span id="imageCount" class="filter-toggle">81 Referenzen filtern</span>
-</h1>
+    <div>
+      <h1>Aleas Referenzen</h1>
+      <p class="site-intro">A personal architecture reference archive for filtering images by author, place, typology, material, form, and detail.</p>
+    </div>
   </div>
 
+  <nav class="page-actions" aria-label="Page actions">
+    <button id="imageCount" class="filter-toggle" type="button">81 Referenzen filtern</button>
+    <a class="button-link" href="submit.html">Referenz hinzufügen</a>
+  </nav>
+
   <div class="filters">
+    <div class="filter-toolbar">
+      <button id="clearFilters" type="button">Deselect all</button>
+      <button id="pdfButton" type="button">Export PDF</button>
+    </div>
 
     <div class="filter-group" data-group="Author">
       <h2>Author</h2>
@@ -72,11 +81,7 @@
   </div>
 
 
-  <button id="pdfButton">Export PDF</button>
-     
   <div id="printTags"></div>
-
-<div class="gallery"></div>
 
   <div class="gallery"></div>
 
@@ -87,6 +92,9 @@
     <p>All images remain the property of their respective authors. If you are the copyright holder of any image and wish it to be removed, please contact me and it will be taken down immediately.</p>
   </footer>
 
+<script src="data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="script.js"></script>
 
 </body>
