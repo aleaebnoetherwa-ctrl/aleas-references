@@ -66,7 +66,7 @@ async function loadReferenceData() {
           .from("references")
           .select("image, source, title, tags")
           .eq("status", "approved")
-          .order("created_at", { ascending: true }),
+          .order("created_at", { ascending: false }),
         supabaseClient
           .from("tag_groups")
           .select("group_name, tags")
