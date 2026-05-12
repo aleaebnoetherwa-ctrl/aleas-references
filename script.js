@@ -35,6 +35,7 @@ async function init() {
   initFilterCategories();
   initFilterControls();
   initSubmitForm();
+  initTagSearches();
   updatePrintTags();
 }
 
@@ -75,15 +76,8 @@ async function loadReferenceData() {
     if (referencesError) throw referencesError;
     if (groupsError) throw groupsError;
 
-    if (!references || references.length === 0) {
-      return {
-        items: fallbackData.items,
-        tagGroups: buildTagGroups(groups, fallbackData.tagGroups)
-      };
-    }
-
     return {
-      items: references,
+      items: mergeReferenceItems(fallbackData.items, references || []),
       tagGroups: buildTagGroups(groups, fallbackData.tagGroups)
     };
   } catch (error) {
@@ -93,16 +87,37 @@ async function loadReferenceData() {
 }
 
 function buildTagGroups(groups, fallbackGroups) {
-  const mergedGroups = { ...fallbackGroups };
+  const mergedGroups = normalizeTagGroups(fallbackGroups);
 
   if (!groups || groups.length === 0) {
     return mergedGroups;
   }
 
   return groups.reduce((result, group) => {
-    result[group.group_name] = group.tags || [];
+    result[group.group_name] = normalizeTagList(group.tags);
     return result;
   }, mergedGroups);
+}
+
+function mergeReferenceItems(localItems, remoteItems) {
+  const mergedItems = localItems.map(normalizeReferenceItem);
+  const knownKeys = new Set(localItems.map(item => getReferenceKey(item)));
+
+  remoteItems.forEach(item => {
+    const normalizedItem = normalizeReferenceItem(item);
+    const key = getReferenceKey(normalizedItem);
+
+    if (!knownKeys.has(key)) {
+      mergedItems.push(normalizedItem);
+      knownKeys.add(key);
+    }
+  });
+
+  return mergedItems;
+}
+
+function getReferenceKey(item) {
+  return `${item.image || ""}|${item.source || ""}|${item.title || ""}`;
 }
 
 function flattenTags(groupData) {
@@ -115,6 +130,36 @@ function flattenTags(groupData) {
   }
 
   return groupData;
+}
+
+function normalizeReferenceItem(item) {
+  return {
+    ...item,
+    tags: normalizeTagList(item.tags)
+  };
+}
+
+function normalizeTagGroups(groups) {
+  return Object.entries(groups || {}).reduce((result, [category, groupData]) => {
+    if (Array.isArray(groupData) && Array.isArray(groupData[0])) {
+      result[category] = groupData.map(section => normalizeTagList(section));
+    } else {
+      result[category] = normalizeTagList(groupData);
+    }
+
+    return result;
+  }, {});
+}
+
+function normalizeTagList(tags) {
+  return [...new Set((tags || []).map(tag => cleanTag(tag)).filter(Boolean))];
+}
+
+function getAllTagEntries() {
+  return Object.entries(tagGroups).flatMap(([category, groupData]) =>
+    [...new Set(flattenTags(groupData).map(tag => cleanTag(tag)).filter(Boolean))]
+      .map(tag => ({ category, tag }))
+  ).sort((a, b) => a.tag.localeCompare(b.tag, "en", { sensitivity: "base" }));
 }
 
 
@@ -131,7 +176,7 @@ function initFilterCategories() {
     if (!title) return;
 
     title.addEventListener("click", () => {
-      group.classList.toggle("open");
+      group.classList.toggle("pinned");
     });
   });
 }
@@ -156,6 +201,83 @@ function initFilterControls() {
   updateFilterActionVisibility();
 }
 
+function initTagSearches() {
+  initTagSearch({
+    inputId: "filterTagSearch",
+    suggestionsId: "filterTagSuggestions",
+    onSelect: selectFilterTag
+  });
+
+  initTagSearch({
+    inputId: "submitTagSearch",
+    suggestionsId: "submitTagSuggestions",
+    onSelect: selectSubmitTag
+  });
+}
+
+function initTagSearch({ inputId, suggestionsId, onSelect }) {
+  const input = document.getElementById(inputId);
+  const suggestions = document.getElementById(suggestionsId);
+
+  if (!input || !suggestions) return;
+
+  input.addEventListener("input", () => {
+    renderTagSuggestions(input, suggestions, onSelect);
+  });
+
+  input.addEventListener("focus", () => {
+    renderTagSuggestions(input, suggestions, onSelect);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (event.target === input || suggestions.contains(event.target)) return;
+    suggestions.classList.remove("open");
+  });
+}
+
+function renderTagSuggestions(input, suggestions, onSelect) {
+  const query = cleanSearchQuery(input.value);
+  suggestions.innerHTML = "";
+
+  if (query.length === 0) {
+    suggestions.classList.remove("open");
+    return;
+  }
+
+  const matches = getAllTagEntries()
+    .filter(({ tag }) => tag.includes(query))
+    .slice(0, 12);
+
+  matches.forEach(({ category, tag }) => {
+    const button = document.createElement("button");
+    button.type = "button";
+
+    const tagName = document.createElement("span");
+    tagName.className = "suggestion-tag";
+    tagName.textContent = tag;
+
+    const categoryName = document.createElement("span");
+    categoryName.className = "suggestion-category";
+    categoryName.textContent = category;
+
+    button.appendChild(tagName);
+    button.appendChild(categoryName);
+
+    button.addEventListener("click", () => {
+      onSelect(tag);
+      input.value = "";
+      suggestions.classList.remove("open");
+    });
+    suggestions.appendChild(button);
+  });
+
+  suggestions.classList.toggle("open", matches.length > 0);
+}
+
+function cleanSearchQuery(value) {
+  return cleanTag(value).replace(/-$/g, "");
+}
+
 function generateGallery() {
   const gallery = document.querySelector(".gallery");
   if (!gallery) return;
@@ -165,7 +287,7 @@ function generateGallery() {
   items.forEach(item => {
     const div = document.createElement("div");
     div.className = "item";
-    div.dataset.tags = (item.tags || []).join(" ");
+    div.dataset.tags = normalizeTagList(item.tags).join(" ");
 
     const image = document.createElement("img");
     image.src = item.image;
@@ -217,10 +339,10 @@ function initSubmitForm() {
     const record = {
       image: getFormValue(formData, "image"),
       source: getFormValue(formData, "source") || null,
-      title: getFormValue(formData, "title"),
+      title: buildSubmitTitle(formData),
       tags,
       submitter_name: getFormValue(formData, "submitter_name") || null,
-      status: "pending"
+      status: isAutoApprovedSubmitter(getFormValue(formData, "submitter_name")) ? "approved" : "pending"
     };
 
     if (!record.image || !record.title || record.tags.length === 0) {
@@ -234,7 +356,7 @@ function initSubmitForm() {
 
     if (error) {
       console.error(error);
-      setSubmitStatus(status, "Speichern hat nicht geklappt. Bitte später nochmal versuchen.");
+      setSubmitStatus(status, error.message || "Speichern hat nicht geklappt. Bitte später nochmal versuchen.");
       return;
     }
 
@@ -243,12 +365,20 @@ function initSubmitForm() {
     document.querySelectorAll("#submitTagGroups button.selected").forEach(button => {
       button.classList.remove("selected");
     });
+    createSubmitTagSelector();
     resetNewSubmitTags();
-    setSubmitStatus(status, "Danke. Die Referenz wartet jetzt auf Freigabe.");
+    setSubmitStatus(
+      status,
+      record.status === "approved"
+        ? "Danke. Die Referenz ist direkt freigegeben."
+        : "Danke. Die Referenz wartet jetzt auf Freigabe."
+    );
   });
 }
 
 async function submitReference(record, newTagsByCategory) {
+  const hasNewTags = Object.values(newTagsByCategory).some(tags => tags.length > 0);
+
   const { error: rpcError } = await supabaseClient.rpc("submit_reference", {
     p_image: record.image,
     p_source: record.source,
@@ -263,7 +393,13 @@ async function submitReference(record, newTagsByCategory) {
     return { error: null };
   }
 
-  console.warn("submit_reference RPC failed. Falling back to plain insert.", rpcError);
+  console.warn("submit_reference RPC failed.", rpcError);
+
+  if (hasNewTags) {
+    return {
+      error: new Error("Neue Tags konnten nicht in Supabase gespeichert werden. Bitte supabase-schema.sql erneut ausführen.")
+    };
+  }
 
   return supabaseClient
     .from("references")
@@ -319,6 +455,16 @@ function createSubmitTagSelector() {
   }
 }
 
+function selectSubmitTag(tag) {
+  tag = cleanTag(tag);
+  selectedSubmitTags.add(tag);
+
+  document.querySelectorAll("#submitTagGroups button").forEach(button => {
+    if (button.dataset.tag !== tag) return;
+    button.classList.add("selected");
+  });
+}
+
 function initNewSubmitTags() {
   const addButton = document.getElementById("addSubmitTagRow");
   if (!addButton) return;
@@ -367,6 +513,12 @@ function addNewSubmitTagRow() {
     select.appendChild(option);
   }
 
+  select.addEventListener("change", () => {
+    updateNewSubmitTagPlaceholder(input, select);
+  });
+
+  updateNewSubmitTagPlaceholder(input, select);
+
   const removeButton = document.createElement("button");
   removeButton.type = "button";
   removeButton.textContent = "Remove";
@@ -376,6 +528,15 @@ function addNewSubmitTagRow() {
   row.appendChild(select);
   row.appendChild(removeButton);
   wrapper.appendChild(row);
+}
+
+function updateNewSubmitTagPlaceholder(input, select) {
+  if (select.value === "Author") {
+    input.placeholder = "surname given name";
+    return;
+  }
+
+  input.placeholder = "new-tag";
 }
 
 function getNewSubmitTagsByCategory() {
@@ -429,19 +590,22 @@ function getFormValue(formData, key) {
   return String(formData.get(key) || "").trim();
 }
 
+function isAutoApprovedSubmitter(name) {
+  return cleanTag(name) === "alea";
+}
+
+function buildSubmitTitle(formData) {
+  const author = getFormValue(formData, "title_author");
+  const project = getFormValue(formData, "title_project");
+
+  return [author, project].filter(Boolean).join("  —  ");
+}
+
 function cleanTag(tag) {
   return tag
     .trim()
     .toLowerCase()
     .replace(/\s+/g, "-")
-    .replaceAll("ä", "ae")
-    .replaceAll("ö", "oe")
-    .replaceAll("ü", "ue")
-    .replaceAll("é", "e")
-    .replaceAll("è", "e")
-    .replaceAll("à", "a")
-    .replaceAll("ç", "c")
-    .replace(/[^a-z0-9-]/g, "")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 }
@@ -458,7 +622,7 @@ function updatePrintTags() {
   if (activeTags.length === 0) {
     el.textContent = "Alle Referenzen";
   } else {
-    el.textContent = "filtered by:" + activeTags.join(", ");
+    el.textContent = activeTags.join(", ");
   }
 }
 
@@ -517,6 +681,21 @@ function createButton(tag, container) {
   container.appendChild(button);
 }
 
+function selectFilterTag(tag) {
+  tag = cleanTag(tag);
+
+  if (!activeTags.includes(tag)) {
+    activeTags.push(tag);
+  }
+
+  document.querySelectorAll(".filters button").forEach(button => {
+    if (button.dataset.tag !== tag) return;
+    button.classList.add("selected");
+  });
+
+  filterImages();
+}
+
 
 /* =========================
    6. FILTER CLICK
@@ -527,6 +706,7 @@ document.addEventListener("click", (e) => {
 
   const button = e.target;
   const tag = button.dataset.tag;
+  if (!tag) return;
 
   if (activeTags.includes(tag)) {
     activeTags = activeTags.filter(t => t !== tag);
@@ -546,6 +726,10 @@ function resetFilters() {
 
   document.querySelectorAll(".filters button.selected").forEach(button => {
     button.classList.remove("selected");
+  });
+
+  document.querySelectorAll(".filter-group.pinned").forEach(group => {
+    group.classList.remove("pinned");
   });
 
   if (images) {
@@ -568,7 +752,10 @@ function filterImages() {
   currentMatches = [];
 
   images.forEach(img => {
-    const tags = img.dataset.tags.toLowerCase().split(" ");
+    const tags = img.dataset.tags
+      .split(" ")
+      .map(tag => cleanTag(tag))
+      .filter(Boolean);
     const match = activeTags.every(tag => tags.includes(tag));
 
     if (activeTags.length === 0) {
@@ -643,16 +830,71 @@ function getPdfFileName() {
   return `references_${filterName}`;
 }
 
+function getPrintableItems() {
+  if (activeTags.length === 0) {
+    return items;
+  }
+
+  return items.filter(item => {
+    const tags = normalizeTagList(item.tags);
+    return activeTags.every(tag => tags.includes(tag));
+  });
+}
+
+function buildPrintPages() {
+  const wrapper = document.getElementById("printPages");
+  if (!wrapper) return;
+
+  wrapper.innerHTML = "";
+
+  const printableItems = getPrintableItems();
+
+  for (let i = 0; i < printableItems.length; i += 6) {
+    const page = document.createElement("section");
+    page.className = "print-page";
+    const pageItems = printableItems.slice(i, i + 6);
+
+    const tags = document.createElement("p");
+    tags.className = "print-page-tags";
+    tags.textContent = activeTags.length ? activeTags.join(", ") : "all references";
+
+    const grid = document.createElement("div");
+    grid.className = "print-grid";
+
+    pageItems.forEach(item => {
+      const card = document.createElement("article");
+      card.className = "print-card";
+
+      const image = document.createElement("img");
+      image.src = item.image;
+      image.alt = item.title;
+
+      const title = document.createElement("p");
+      title.textContent = item.title;
+
+      card.appendChild(image);
+      card.appendChild(title);
+      grid.appendChild(card);
+    });
+
+    page.appendChild(tags);
+    page.appendChild(grid);
+    wrapper.appendChild(page);
+  }
+}
+
 if (pdfButton) {
   pdfButton.addEventListener("click", () => {
     const oldTitle = document.title;
 
     document.title = getPdfFileName();
+    buildPrintPages();
 
     setTimeout(() => {
       window.print();
 
       setTimeout(() => {
+        document.getElementById("printPages").innerHTML = "";
         document.title = oldTitle;
       }, 1000);
     }, 100);

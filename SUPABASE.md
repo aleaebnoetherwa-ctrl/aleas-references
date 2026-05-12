@@ -11,9 +11,9 @@ window.supabaseConfig = {
 };
 ```
 
-4. Add approved rows to the `references` table.
+4. Run `supabase-import-data.sql` once to import the existing local references and tag groups.
 
 The website reads only rows where `status = 'approved'`.
 Public submissions are inserted with `status = 'pending'`, so they do not appear until reviewed.
 
-For now, `data.js` remains as a local fallback. Once all existing references are imported into Supabase, it can be removed from `index.html`.
+The website now loads data from Supabase instead of `data.js`.

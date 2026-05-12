@@ -22,6 +22,22 @@ create table if not exists public.tag_groups (
 alter table public.references enable row level security;
 alter table public.tag_groups enable row level security;
 
+create or replace function public.normalize_reference_status()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.status = lower(trim(new.status));
+  return new;
+end;
+$$;
+
+drop trigger if exists normalize_reference_status_before_write on public.references;
+create trigger normalize_reference_status_before_write
+before insert or update on public.references
+for each row
+execute function public.normalize_reference_status();
+
 drop policy if exists "Approved references are public" on public.references;
 create policy "Approved references are public"
 on public.references
@@ -34,7 +50,16 @@ create policy "Anyone can submit pending references"
 on public.references
 for insert
 to anon, authenticated
-with check (status = 'pending' and submitted_by is null);
+with check (
+  submitted_by is null
+  and (
+    status = 'pending'
+    or (
+      status = 'approved'
+      and lower(trim(coalesce(submitter_name, ''))) = 'alea'
+    )
+  )
+);
 
 drop policy if exists "Tag groups are public" on public.tag_groups;
 create policy "Tag groups are public"
@@ -60,7 +85,13 @@ declare
   new_reference_id uuid;
   category text;
   merged_tags text[];
+  reference_status text;
 begin
+  reference_status := case
+    when lower(trim(coalesce(p_submitter_name, ''))) = 'alea' then 'approved'
+    else 'pending'
+  end;
+
   insert into public.references (
     image,
     source,
@@ -75,7 +106,7 @@ begin
     p_title,
     p_tags,
     nullif(p_submitter_name, ''),
-    'pending'
+    reference_status
   )
   returning id into new_reference_id;
 

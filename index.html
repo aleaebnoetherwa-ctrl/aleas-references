@@ -13,7 +13,7 @@
     <img src="images/logo.png" class="logo">
     <div>
       <h1>Aleas Referenzen</h1>
-      <p class="site-intro">A personal architecture reference archive for filtering images by author, place, typology, material, form, and detail.</p>
+      <p class="site-intro">A personal architecture reference archive for filtering project references.</p>
     </div>
   </div>
 
@@ -24,8 +24,12 @@
 
   <div class="filters">
     <div class="filter-toolbar">
+      <div class="tag-search">
+        <label for="filterTagSearch">Search tags</label>
+        <input id="filterTagSearch" type="search" autocomplete="off" placeholder="type a tag">
+        <div id="filterTagSuggestions" class="tag-suggestions"></div>
+      </div>
       <button id="clearFilters" type="button">Deselect all</button>
-      <button id="pdfButton" type="button">Export PDF</button>
     </div>
 
     <div class="filter-group" data-group="Author">
@@ -80,8 +84,12 @@
 
   </div>
 
+  <div class="gallery-actions">
+    <button id="pdfButton" class="filter-toggle" type="button">Export PDF with current filters</button>
+  </div>
 
   <div id="printTags"></div>
+  <div id="printPages"></div>
 
   <div class="gallery"></div>
 
@@ -92,7 +100,6 @@
     <p>All images remain the property of their respective authors. If you are the copyright holder of any image and wish it to be removed, please contact me and it will be taken down immediately.</p>
   </footer>
 
-<script src="data.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="script.js"></script>

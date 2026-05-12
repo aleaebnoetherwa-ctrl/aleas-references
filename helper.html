@@ -51,6 +51,22 @@
       align-items: start;
     }
 
+    .title-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .title-row input {
+      margin-bottom: 0;
+    }
+
+    .title-separator {
+      color: #666;
+    }
+
     .new-tag-row button {
       margin-top: 0;
       height: 34px;
@@ -78,8 +94,13 @@
         padding: 20px;
       }
 
-      .new-tag-row {
+      .new-tag-row,
+      .title-row {
         grid-template-columns: 1fr;
+      }
+
+      .title-separator {
+        display: none;
       }
     }
   </style>
@@ -94,8 +115,12 @@
   <label for="source">Source URL</label>
   <input id="source" type="url" placeholder="https://example.com/project-page/">
 
-  <label for="title">Title</label>
-  <input id="title" placeholder="Author  —  Project Name">
+  <label>Title</label>
+  <div class="title-row">
+    <input id="titleAuthor" placeholder="Author">
+    <span class="title-separator">—</span>
+    <input id="titleProject" placeholder="Project Name">
+  </div>
 
   <h3>Choose existing tags</h3>
   <div id="tagButtons"></div>
@@ -225,14 +250,6 @@
         .trim()
         .toLowerCase()
         .replace(/\s+/g, "-")
-        .replaceAll("ä", "ae")
-        .replaceAll("ö", "oe")
-        .replaceAll("ü", "ue")
-        .replaceAll("é", "e")
-        .replaceAll("è", "e")
-        .replaceAll("à", "a")
-        .replaceAll("ç", "c")
-        .replace(/[^a-z0-9-]/g, "")
         .replace(/-+/g, "-")
         .replace(/^-|-$/g, "");
     }
@@ -246,7 +263,9 @@
     function generate() {
       const image = document.getElementById("image").value.trim();
       const source = document.getElementById("source").value.trim();
-      const title = document.getElementById("title").value.trim();
+      const titleAuthor = document.getElementById("titleAuthor").value.trim();
+      const titleProject = document.getElementById("titleProject").value.trim();
+      const title = [titleAuthor, titleProject].filter(Boolean).join("  —  ");
 
       const newTagRows = document.querySelectorAll(".new-tag-row");
 

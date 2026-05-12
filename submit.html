@@ -26,21 +26,31 @@
       <label for="submitSource">Source URL</label>
       <input id="submitSource" name="source" type="url" placeholder="https://example.com/project-page/">
 
-      <label for="submitTitle">Title</label>
-      <input id="submitTitle" name="title" required placeholder="Author  —  Project Name">
+      <label>Title</label>
+      <div class="title-row submit-title-row">
+        <input id="submitTitleAuthor" name="title_author" required placeholder="Author">
+        <span class="title-separator">—</span>
+        <input id="submitTitleProject" name="title_project" required placeholder="Project Name">
+      </div>
 
       <fieldset class="submit-tags">
         <legend>Existing tags</legend>
+        <div class="tag-search submit-tag-search">
+          <label for="submitTagSearch">Search tags</label>
+          <input id="submitTagSearch" type="search" autocomplete="off" placeholder="type a tag">
+          <div id="submitTagSuggestions" class="tag-suggestions"></div>
+        </div>
         <div id="submitTagGroups"></div>
       </fieldset>
 
       <fieldset class="submit-tags">
         <legend>New tags</legend>
+        <p class="submit-help">For new Author tags, enter surname first, then given name. Example: Zumthor Peter.</p>
         <div id="newSubmitTagRows"></div>
         <button id="addSubmitTagRow" type="button">Add new tag</button>
       </fieldset>
 
-      <label for="submitterName">Name</label>
+      <label for="submitterName">Your name</label>
       <input id="submitterName" name="submitter_name" placeholder="optional">
 
       <button type="submit">Submit reference</button>
@@ -48,7 +58,6 @@
     </form>
   </section>
 
-  <script src="data.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="script.js"></script>
