@@ -688,9 +688,14 @@ function selectFilterTag(tag) {
     activeTags.push(tag);
   }
 
+  document.querySelector(".filters")?.classList.add("open");
+
   document.querySelectorAll(".filters button").forEach(button => {
     if (button.dataset.tag !== tag) return;
     button.classList.add("selected");
+
+    const group = button.parentElement?.closest(".filter-group");
+    group?.classList.add("pinned");
   });
 
   filterImages();

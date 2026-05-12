@@ -1,18 +1,36 @@
 /* ----------- BASE ----------- */
 
+:root {
+  --bg: #ffffff;
+  --paper: #fafafa;
+  --text: #111111;
+  --muted: #6f6f6f;
+  --soft: #ececec;
+  --soft-2: #d8d8d8;
+  --soft-3: #f5f5f5;
+  --dark: #111111;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 34px 96px;
-  color: #111;
-  background: white;
+  color: var(--text);
+  background: var(--bg);
+  font-size: 15px;
+  line-height: 1.4;
 }
 
 h1 {
-  font-size: 44px;
+  font-size: clamp(38px, 5vw, 56px);
   line-height: 0.95;
-  margin: 0 0 6px;
-  letter-spacing: 0;
+  margin: 0 0 8px;
+  letter-spacing: -0.04em;
+  font-weight: 700;
 }
 
 a {
@@ -23,16 +41,17 @@ a {
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 18px;
   max-width: 980px;
-  margin-bottom: 28px;
+  margin-bottom: 30px;
 }
 
 .logo {
   height: 50px;
   width: auto;
   flex: 0 0 auto;
+  margin-top: 2px;
 }
 
 #imageCount,
@@ -40,13 +59,13 @@ a {
   border-color: #111;
   background: #111;
   color: white;
-  font-size: 16px;
+  font-size: 15px;
   min-width: 220px;
 }
 
 #imageCount:hover,
 #pdfButton:hover {
-  background: #333;
+  background: #2c2c2c;
   color: white;
 }
 
@@ -59,37 +78,49 @@ a {
   max-width: 760px;
   margin: 0;
   font-size: 14px;
-  line-height: 1.4;
-  color: #666;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
 /* ----------- BUTTONS ----------- */
 
 button {
-  padding: 7px 11px;
+  padding: 8px 13px;
   cursor: pointer;
-  border: 1px solid #ccc;
+  border: 1px solid var(--soft-2);
   background: white;
   color: black;
   font: inherit;
+  border-radius: 3px;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 button:hover {
-  background: #eee;
+  background: var(--soft-3);
+  border-color: #bdbdbd;
 }
 
 .button-link {
   display: inline-block;
-  padding: 7px 11px;
-  border: 1px solid #ccc;
+  padding: 8px 13px;
+  border: 1px solid var(--soft-2);
   background: white;
   color: black;
   font: inherit;
   text-decoration: none;
+  border-radius: 3px;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .button-link:hover {
-  background: #eee;
+  background: var(--soft-3);
+  border-color: #bdbdbd;
 }
 
 .page-actions {
@@ -97,10 +128,9 @@ button:hover {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  padding: 12px 0;
-  border-top: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 22px;
+  padding: 4px 0 10px;
+  margin-bottom: 20px;
+  border: 0;
 }
 
 .gallery-actions {
@@ -109,13 +139,14 @@ button:hover {
 }
 
 .gallery-actions #pdfButton.visible {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 button.selected,
 .selected {
   background: black;
   color: white;
+  border-color: black;
 }
 
 /* ----------- FILTERS ----------- */
@@ -123,10 +154,10 @@ button.selected,
 .filters {
   display: none;
   grid-template-columns: 180px 1fr;
-  gap: 6px 24px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 26px;
+  gap: 6px 22px;
+  padding: 4px 0 12px;
+  margin-bottom: 20px;
+  border: 0;
 }
 
 .filters.open {
@@ -144,7 +175,7 @@ button.selected,
   justify-content: flex-end;
   gap: 8px;
   min-height: 32px;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .tag-search {
@@ -155,17 +186,27 @@ button.selected,
 
 .tag-search label {
   display: block;
-  margin-bottom: 4px;
-  font-size: 12px;
-  color: #666;
+  margin-bottom: 5px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
 .tag-search input {
   width: 100%;
   padding: 9px 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--soft-2);
+  border-radius: 3px;
+  background: white;
   font: inherit;
   box-sizing: border-box;
+}
+
+.tag-search input:focus,
+.submit-reference input:focus,
+.submit-reference select:focus {
+  outline: none;
+  border-color: #111;
 }
 
 .tag-suggestions {
@@ -175,7 +216,7 @@ button.selected,
   width: 100%;
   max-height: 220px;
   overflow: auto;
-  border: 1px solid #ccc;
+  border: 1px solid var(--soft-2);
   border-top: 0;
   background: white;
   box-sizing: border-box;
@@ -191,20 +232,26 @@ button.selected,
   justify-content: space-between;
   gap: 10px;
   width: 100%;
-  padding: 9px 10px;
+  padding: 10px 12px;
   border: 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #f0f0f0;
+  border-radius: 0;
   text-align: left;
+  background: white;
+}
+
+.tag-suggestions button:last-child {
+  border-bottom: 0;
 }
 
 .suggestion-tag {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .suggestion-category {
   flex: 0 0 auto;
   font-size: 11px;
-  color: #888;
+  color: #8a8a8a;
 }
 
 #clearFilters,
@@ -219,33 +266,35 @@ button.selected,
 
 .filter-group h2 {
   grid-column: 1;
-  margin: 4px 0 0;
-  font-size: 13px;
+  margin: 3px 0 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--muted);
   cursor: pointer;
-  opacity: 0.5;
 }
 
 .filter-group h2:hover,
 .filter-group.pinned h2 {
-  opacity: 1;
+  color: #111;
 }
 
 .filter-group .buttons {
   grid-column: 2;
   display: none;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 6px;
 }
 
 .filter-group.pinned .buttons {
   display: flex;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .filter-group .buttons button {
-  padding: 4px 7px;
-  font-size: 13px;
-  border-color: #d8d8d8;
+  padding: 5px 8px;
+  font-size: 14px;
+  border-color: var(--soft-2);
   background: #fff;
 }
 
@@ -258,7 +307,7 @@ button.selected,
 
 .tag-spacer {
   flex-basis: 100%;
-  height: 10px;
+  height: 6px;
 }
 
 /* ----------- SUBMIT FORM ----------- */
@@ -266,6 +315,9 @@ button.selected,
 .submit-reference {
   max-width: 620px;
   margin-bottom: 40px;
+  padding: 20px;
+  background: var(--paper);
+  border-radius: 6px;
 }
 
 .submit-page .submit-reference {
@@ -273,37 +325,45 @@ button.selected,
 }
 
 .submit-reference h2 {
-  margin: 0 0 12px;
-  font-size: 16px;
+  margin: 0 0 14px;
+  font-size: 15px;
 }
 
 .submit-reference form {
   display: grid;
   grid-template-columns: 120px 1fr;
-  gap: 8px 12px;
+  gap: 10px 12px;
   align-items: center;
 }
 
 .submit-reference label {
-  font-size: 12px;
-  color: #555;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
-.submit-reference input {
+.submit-reference input,
+.submit-reference select {
   width: 100%;
-  padding: 7px 8px;
-  border: 1px solid #ccc;
+  padding: 9px 10px;
+  border: 1px solid var(--soft-2);
+  border-radius: 3px;
   font: inherit;
+  background: white;
   box-sizing: border-box;
 }
 
 .submit-reference select {
-  width: 100%;
-  padding: 7px 8px;
-  border: 1px solid #ccc;
-  background: white;
-  font: inherit;
-  box-sizing: border-box;
+  appearance: none;
+  padding-right: 34px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #666 50%),
+    linear-gradient(135deg, #666 50%, transparent 50%);
+  background-position:
+    calc(100% - 17px) 50%,
+    calc(100% - 12px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
 }
 
 .title-row {
@@ -330,16 +390,17 @@ button.selected,
 
 .submit-tags legend {
   margin-bottom: 10px;
-  font-size: 13px;
-  color: #555;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
 .submit-help {
   max-width: 680px;
   margin: -2px 0 12px;
-  font-size: 12px;
-  line-height: 1.4;
-  color: #666;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
 .submit-tag-search {
@@ -355,21 +416,22 @@ button.selected,
 
 .submit-tag-group h2 {
   margin: 4px 0 0;
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1.45;
   font-weight: normal;
-  color: #666;
+  color: var(--muted);
 }
 
 .submit-tag-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 6px;
 }
 
 .submit-tag-buttons button {
-  padding: 4px 7px;
-  font-size: 13px;
-  border-color: #d8d8d8;
+  padding: 5px 8px;
+  font-size: 14px;
+  border-color: var(--soft-2);
 }
 
 .new-submit-tag-row {
@@ -387,15 +449,15 @@ button.selected,
 .submit-reference p {
   min-height: 18px;
   margin: 0;
-  font-size: 12px;
-  color: #555;
+  font-size: 14px;
+  color: var(--muted);
 }
 
 /* ----------- MASONRY GALLERY ----------- */
 
 .gallery {
   column-count: 5;
-  column-gap: 0;
+  column-gap: 10px;
 }
 
 /* ----------- ITEMS ----------- */
@@ -403,7 +465,7 @@ button.selected,
 .item {
   position: relative;
   break-inside: avoid;
-  margin: 0;
+  margin: 0 0 10px;
   overflow: hidden;
 }
 
@@ -419,26 +481,32 @@ button.selected,
   width: 100%;
   height: auto;
   display: block;
+  transition: opacity 0.2s ease;
 }
 
 /* ----------- HOVER LABEL ----------- */
 
 .item p {
   position: absolute;
-  left: 10px;
-  bottom: 10px;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
   margin: 0;
-  padding: 4px 6px;
+  padding: 6px 8px;
   font-size: 12px;
-  background: white;
+  line-height: 1.25;
+  background: rgba(255, 255, 255, 0.94);
   color: black;
+  border-radius: 3px;
   opacity: 0;
   transition: 0.2s;
   pointer-events: none;
+  width: max-content;
+  max-width: calc(100% - 20px);
 }
 
 .item:hover img {
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 .item:hover p {
@@ -454,11 +522,43 @@ button.selected,
 /* ----------- DISCLAIMER ----------- */
 
 .disclaimer {
-  margin-top: 80px;
-  padding-top: 10px;
+  margin-top: 70px;
+  padding-top: 0;
   font-size: 11px;
   color: #999;
   font-family: inherit;
+}
+
+/* ----------- MOBILE NOTICE ----------- */
+
+.mobile-notice {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.mobile-notice.visible {
+  display: flex;
+}
+
+.mobile-notice-dialog {
+  width: min(100%, 340px);
+  padding: 18px;
+  border: 1px solid var(--soft-2);
+  border-radius: 6px;
+  background: white;
+}
+
+.mobile-notice-dialog p {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
 /* ----------- RESPONSIVE ----------- */
@@ -515,10 +615,16 @@ button.selected,
 
   .logo {
     height: 42px;
+    margin-top: 0;
   }
 
   .gallery {
     column-count: 2;
+    column-gap: 8px;
+  }
+
+  .item {
+    margin-bottom: 8px;
   }
 
   .filters {
@@ -610,6 +716,7 @@ button.selected,
     margin: 0 !important;
     width: auto !important;
     height: auto !important;
+    background: white !important;
   }
 
   .header,
@@ -618,6 +725,7 @@ button.selected,
   .submit-reference,
   .page-actions,
   .gallery-actions,
+  .mobile-notice,
   #pdfButton {
     display: none !important;
   }
