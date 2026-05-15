@@ -23,10 +23,10 @@ const LOCATION_CITY_GROUP = "Location (city)";
 const LOCATION_LANDSCAPE_GROUP = "Location (landscape)";
 const LOCATION_SUBGROUPS = [LOCATION_COUNTRY_GROUP, LOCATION_CITY_GROUP, LOCATION_LANDSCAPE_GROUP];
 const LOCATION_COUNTRIES = new Set([
-  "belgium", "denmark", "france", "germany", "italy", "niger", "switzerland", "uk", "usa"
+  "belgium", "brazil", "denmark", "france", "germany", "italy", "niger", "switzerland", "uk", "usa"
 ]);
 const LOCATION_CITIES = new Set([
-  "basel", "berlin", "bordeaux", "paris", "prague", "turin", "vienna", "zurich"
+  "basel", "berlin", "bordeaux", "marseille", "paris", "prague", "sao-paulo", "turin", "vienna", "zurich"
 ]);
 const LOCATION_LANDSCAPES = new Set([
   "coast", "desert", "forest", "mountains"
@@ -244,7 +244,10 @@ function organizeTagGroups(groups) {
 
 function getLocationSections(groups = tagGroups) {
   const sections = [new Set(), new Set(), new Set()];
-  const locationTags = normalizeTagList(flattenTags(groups[LOCATION_GROUP]));
+  const hasLocationSubgroups = LOCATION_SUBGROUPS.some(groupName => groups[groupName]);
+  const locationTags = hasLocationSubgroups
+    ? normalizeTagList(groups[LOCATION_GROUP])
+    : normalizeTagList(flattenTags(groups[LOCATION_GROUP]));
 
   locationTags.forEach(tag => {
     sections[getLocationSectionIndex(tag)].add(tag);

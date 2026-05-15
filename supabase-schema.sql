@@ -19,6 +19,32 @@ create table if not exists public.tag_groups (
   created_at timestamptz not null default now()
 );
 
+do $$
+declare
+  countries text[] := array['belgium', 'brazil', 'denmark', 'france', 'germany', 'italy', 'niger', 'switzerland', 'uk', 'usa'];
+  cities text[] := array['basel', 'berlin', 'bordeaux', 'marseille', 'paris', 'prague', 'sao-paulo', 'turin', 'vienna', 'zurich'];
+  landscapes text[] := array['coast', 'desert', 'forest', 'mountains'];
+begin
+  insert into public.tag_groups (group_name, tags, sort_order)
+  values
+    ('Location', countries, 1),
+    ('Location (country)', countries, 10),
+    ('Location (city)', cities, 11),
+    ('Location (landscape)', landscapes, 12)
+  on conflict (group_name)
+  do update set
+    tags = (
+      select array_agg(distinct tag order by tag)
+      from unnest(public.tag_groups.tags || excluded.tags) as tag
+    ),
+    sort_order = least(public.tag_groups.sort_order, excluded.sort_order);
+
+  update public.tag_groups
+  set tags = countries
+  where group_name = 'Location';
+end;
+$$;
+
 alter table public.references enable row level security;
 alter table public.tag_groups enable row level security;
 

@@ -235,6 +235,15 @@ button.selected,
   border-bottom: 0;
 }
 
+.tag-suggestions button.active {
+  background: black;
+  color: white;
+}
+
+.tag-suggestions button.active .suggestion-category {
+  color: #d8d8d8;
+}
+
 .suggestion-tag {
   font-size: 15px;
 }
