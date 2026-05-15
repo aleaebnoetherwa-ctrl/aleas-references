@@ -17,6 +17,26 @@ let currentIndex = 0;
 let currentMatches = [];
 let selectedSubmitTags = new Set();
 
+const LOCATION_GROUP = "Location";
+const LOCATION_COUNTRY_GROUP = "Location (country)";
+const LOCATION_CITY_GROUP = "Location (city)";
+const LOCATION_LANDSCAPE_GROUP = "Location (landscape)";
+const LOCATION_SUBGROUPS = [LOCATION_COUNTRY_GROUP, LOCATION_CITY_GROUP, LOCATION_LANDSCAPE_GROUP];
+const LOCATION_COUNTRIES = new Set([
+  "belgium", "denmark", "france", "germany", "italy", "niger", "switzerland", "uk", "usa"
+]);
+const LOCATION_CITIES = new Set([
+  "basel", "berlin", "bordeaux", "paris", "prague", "turin", "vienna", "zurich"
+]);
+const LOCATION_LANDSCAPES = new Set([
+  "coast", "desert", "forest", "mountains"
+]);
+const CATEGORY_LABELS = {
+  "Wer hats mir gezeigt?": "Shown by"
+};
+const EDIT_CODE = "alea";
+const EDIT_CODE_STORAGE_KEY = "alea-reference-edit-code";
+
 
 /* =========================
    4. INITIALIZE
@@ -27,7 +47,7 @@ init();
 async function init() {
   const data = await loadReferenceData();
   items = data.items;
-  tagGroups = data.tagGroups;
+  tagGroups = organizeTagGroups(data.tagGroups);
 
   generateGallery();
   images = document.querySelectorAll(".gallery .item");
@@ -36,6 +56,7 @@ async function init() {
   initFilterControls();
   initSubmitForm();
   initTagSearches();
+  initMobileNotice();
   updatePrintTags();
 }
 
@@ -51,6 +72,49 @@ function createSupabaseClient() {
   return window.supabase.createClient(config.url, config.anonKey);
 }
 
+function initMobileNotice() {
+  const isSmallScreen = window.matchMedia("(max-width: 700px)").matches;
+  const storageKey = "alea-mobile-notice-dismissed";
+
+  if (!isSmallScreen) return;
+
+  try {
+    if (localStorage.getItem(storageKey) === "true") return;
+  } catch (error) {
+    console.warn("Could not read mobile notice preference.", error);
+  }
+
+  const notice = document.createElement("div");
+  notice.className = "mobile-notice visible";
+
+  const dialog = document.createElement("div");
+  dialog.className = "mobile-notice-dialog";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+
+  const text = document.createElement("p");
+  text.textContent = "This website is best enjoyed on a computer.";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "OK";
+
+  button.addEventListener("click", () => {
+    notice.classList.remove("visible");
+
+    try {
+      localStorage.setItem(storageKey, "true");
+    } catch (error) {
+      console.warn("Could not save mobile notice preference.", error);
+    }
+  });
+
+  dialog.appendChild(text);
+  dialog.appendChild(button);
+  notice.appendChild(dialog);
+  document.body.appendChild(notice);
+}
+
 async function loadReferenceData() {
   const fallbackData = window.referenceData || { items: [], tagGroups: {} };
   supabaseClient = createSupabaseClient();
@@ -64,7 +128,7 @@ async function loadReferenceData() {
       await Promise.all([
         supabaseClient
           .from("references")
-          .select("image, source, title, tags")
+          .select("id, image, source, title, tags")
           .eq("status", "approved")
           .order("created_at", { ascending: false }),
         supabaseClient
@@ -156,10 +220,49 @@ function normalizeTagList(tags) {
 }
 
 function getAllTagEntries() {
-  return Object.entries(tagGroups).flatMap(([category, groupData]) =>
-    [...new Set(flattenTags(groupData).map(tag => cleanTag(tag)).filter(Boolean))]
-      .map(tag => ({ category, tag }))
-  ).sort((a, b) => a.tag.localeCompare(b.tag, "en", { sensitivity: "base" }));
+  return getVisibleTagGroupNames().flatMap(category => {
+    const groupData = category === LOCATION_GROUP ? getLocationSections() : tagGroups[category];
+
+    return [...new Set(flattenTags(groupData).map(tag => cleanTag(tag)).filter(Boolean))]
+      .map(tag => ({ category: getCategoryLabel(category), tag }));
+  }).sort((a, b) => a.tag.localeCompare(b.tag, "en", { sensitivity: "base" }));
+}
+
+function getCategoryLabel(category) {
+  return CATEGORY_LABELS[category] || category;
+}
+
+function getVisibleTagGroupNames() {
+  return Object.keys(tagGroups).filter(category => !LOCATION_SUBGROUPS.includes(category));
+}
+
+function organizeTagGroups(groups) {
+  const organizedGroups = { ...(groups || {}) };
+  organizedGroups[LOCATION_GROUP] = getLocationSections(organizedGroups);
+  return organizedGroups;
+}
+
+function getLocationSections(groups = tagGroups) {
+  const sections = [new Set(), new Set(), new Set()];
+  const locationTags = normalizeTagList(flattenTags(groups[LOCATION_GROUP]));
+
+  locationTags.forEach(tag => {
+    sections[getLocationSectionIndex(tag)].add(tag);
+  });
+
+  normalizeTagList(groups[LOCATION_COUNTRY_GROUP]).forEach(tag => sections[0].add(tag));
+  normalizeTagList(groups[LOCATION_CITY_GROUP]).forEach(tag => sections[1].add(tag));
+  normalizeTagList(groups[LOCATION_LANDSCAPE_GROUP]).forEach(tag => sections[2].add(tag));
+
+  return sections.map(section =>
+    [...section].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))
+  );
+}
+
+function getLocationSectionIndex(tag) {
+  if (LOCATION_CITIES.has(tag)) return 1;
+  if (LOCATION_LANDSCAPES.has(tag)) return 2;
+  return 0;
 }
 
 
@@ -218,10 +321,12 @@ function initTagSearches() {
 function initTagSearch({ inputId, suggestionsId, onSelect }) {
   const input = document.getElementById(inputId);
   const suggestions = document.getElementById(suggestionsId);
+  let activeIndex = -1;
 
   if (!input || !suggestions) return;
 
   input.addEventListener("input", () => {
+    activeIndex = -1;
     renderTagSuggestions(input, suggestions, onSelect);
   });
 
@@ -229,10 +334,56 @@ function initTagSearch({ inputId, suggestionsId, onSelect }) {
     renderTagSuggestions(input, suggestions, onSelect);
   });
 
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (!suggestions.classList.contains("open")) {
+        renderTagSuggestions(input, suggestions, onSelect);
+      }
+      const buttons = [...suggestions.querySelectorAll("button")];
+      if (!buttons.length) return;
+      activeIndex = Math.min(activeIndex + 1, buttons.length - 1);
+      updateActiveSuggestion(buttons, activeIndex);
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (!suggestions.classList.contains("open")) {
+        renderTagSuggestions(input, suggestions, onSelect);
+      }
+      const buttons = [...suggestions.querySelectorAll("button")];
+      if (!buttons.length) return;
+      activeIndex = Math.max(activeIndex - 1, 0);
+      updateActiveSuggestion(buttons, activeIndex);
+    }
+
+    if (event.key === "Enter") {
+      const buttons = [...suggestions.querySelectorAll("button")];
+      if (!buttons.length || !suggestions.classList.contains("open")) return;
+      event.preventDefault();
+      buttons[Math.max(activeIndex, 0)].click();
+      activeIndex = -1;
+    }
+
+    if (event.key === "Escape") {
+      suggestions.classList.remove("open");
+      activeIndex = -1;
+    }
+  });
+
   document.addEventListener("click", (event) => {
     if (event.target === input || suggestions.contains(event.target)) return;
     suggestions.classList.remove("open");
+    activeIndex = -1;
   });
+}
+
+function updateActiveSuggestion(buttons, activeIndex) {
+  buttons.forEach((button, index) => {
+    button.classList.toggle("active", index === activeIndex);
+  });
+
+  buttons[activeIndex]?.scrollIntoView({ block: "nearest" });
 }
 
 function renderTagSuggestions(input, suggestions, onSelect) {
@@ -278,6 +429,28 @@ function cleanSearchQuery(value) {
   return cleanTag(value).replace(/-$/g, "");
 }
 
+function openReferenceEditor(item) {
+  if (!item.id) {
+    window.alert("This reference can only be edited after it has been saved in Supabase.");
+    return;
+  }
+
+  const code = window.prompt("Enter edit code:");
+
+  if (code !== EDIT_CODE) {
+    window.alert("Wrong code.");
+    return;
+  }
+
+  try {
+    sessionStorage.setItem(EDIT_CODE_STORAGE_KEY, code);
+  } catch (error) {
+    console.warn("Could not store edit code.", error);
+  }
+
+  window.location.href = `edit.html?id=${encodeURIComponent(item.id)}`;
+}
+
 function generateGallery() {
   const gallery = document.querySelector(".gallery");
   if (!gallery) return;
@@ -288,6 +461,7 @@ function generateGallery() {
     const div = document.createElement("div");
     div.className = "item";
     div.dataset.tags = normalizeTagList(item.tags).join(" ");
+    div.dataset.id = item.id || "";
 
     const image = document.createElement("img");
     image.src = item.image;
@@ -297,6 +471,34 @@ function generateGallery() {
     title.textContent = item.title;
 
     const content = item.source ? document.createElement("a") : div;
+    const tagMenu = document.createElement("div");
+    tagMenu.className = "item-tags";
+
+    const dots = document.createElement("span");
+    dots.className = "item-tags-dots";
+    dots.textContent = "⋮";
+
+    const tagList = document.createElement("div");
+    tagList.className = "item-tags-list";
+    tagList.textContent = normalizeTagList(item.tags).join(", ");
+
+    const tagPanel = document.createElement("div");
+    tagPanel.className = "item-tags-panel";
+
+    const editButton = document.createElement("button");
+    editButton.className = "item-edit-button";
+    editButton.type = "button";
+    editButton.textContent = "Edit (code only)";
+    editButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openReferenceEditor(item);
+    });
+
+    tagMenu.appendChild(dots);
+    tagPanel.appendChild(tagList);
+    tagPanel.appendChild(editButton);
+    tagMenu.appendChild(tagPanel);
 
     if (item.source) {
       content.href = item.source;
@@ -307,6 +509,7 @@ function generateGallery() {
 
     content.appendChild(image);
     content.appendChild(title);
+    div.appendChild(tagMenu);
 
     gallery.appendChild(div);
   });
@@ -319,15 +522,21 @@ function initSubmitForm() {
   if (!form) return;
 
   const status = document.getElementById("submitStatus");
+  const isEditMode = document.body.classList.contains("edit-page");
   selectedSubmitTags = new Set();
   createSubmitTagSelector();
   initNewSubmitTags();
+
+  if (isEditMode) {
+    initEditForm(form, status);
+    return;
+  }
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     if (!supabaseClient) {
-      setSubmitStatus(status, "Supabase ist noch nicht konfiguriert.");
+      setSubmitStatus(status, "Supabase is not configured yet.");
       return;
     }
 
@@ -346,17 +555,17 @@ function initSubmitForm() {
     };
 
     if (!record.image || !record.title || record.tags.length === 0) {
-      setSubmitStatus(status, "Bitte Bild, Titel und mindestens einen Tag ausfüllen.");
+      setSubmitStatus(status, "Please add an image, a title, and at least one tag.");
       return;
     }
 
-    setSubmitStatus(status, "Wird gespeichert...");
+    setSubmitStatus(status, "Saving...");
 
     const { error } = await submitReference(record, newTagsByCategory);
 
     if (error) {
       console.error(error);
-      setSubmitStatus(status, error.message || "Speichern hat nicht geklappt. Bitte später nochmal versuchen.");
+      setSubmitStatus(status, error.message || "Saving did not work. Please try again later.");
       return;
     }
 
@@ -370,9 +579,94 @@ function initSubmitForm() {
     setSubmitStatus(
       status,
       record.status === "approved"
-        ? "Danke. Die Referenz ist direkt freigegeben."
-        : "Danke. Die Referenz wartet jetzt auf Freigabe."
+        ? "Thank you. The reference is approved directly."
+        : "Thank you. The reference will be checked briefly and approved within one day."
     );
+  });
+}
+
+function initEditForm(form, status) {
+  const referenceId = new URLSearchParams(window.location.search).get("id");
+  const code = getStoredEditCode();
+
+  if (!referenceId || code !== EDIT_CODE) {
+    setSubmitStatus(status, "Edit code required. Please open this page from the reference menu.");
+    form.querySelectorAll("input, button, select").forEach(element => {
+      element.disabled = true;
+    });
+    return;
+  }
+
+  const reference = items.find(item => item.id === referenceId);
+
+  if (!reference) {
+    setSubmitStatus(status, "Reference not found.");
+    return;
+  }
+
+  fillEditForm(reference);
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!supabaseClient) {
+      setSubmitStatus(status, "Supabase is not configured yet.");
+      return;
+    }
+
+    const formData = new FormData(form);
+    const newTagsByCategory = getNewSubmitTagsByCategory();
+    const newTags = Object.values(newTagsByCategory).flat();
+    const tags = [...new Set([...selectedSubmitTags, ...newTags])];
+
+    const record = {
+      id: referenceId,
+      image: getFormValue(formData, "image"),
+      source: getFormValue(formData, "source") || null,
+      title: buildSubmitTitle(formData),
+      tags
+    };
+
+    if (!record.image || !record.title || record.tags.length === 0) {
+      setSubmitStatus(status, "Please add an image, a title, and at least one tag.");
+      return;
+    }
+
+    setSubmitStatus(status, "Saving changes...");
+
+    const { error } = await updateReference(record, newTagsByCategory, code);
+
+    if (error) {
+      console.error(error);
+      setSubmitStatus(status, error.message || "Saving changes did not work. Please try again later.");
+      return;
+    }
+
+    setSubmitStatus(status, "Changes saved.");
+  });
+}
+
+function getStoredEditCode() {
+  try {
+    return sessionStorage.getItem(EDIT_CODE_STORAGE_KEY);
+  } catch (error) {
+    console.warn("Could not read edit code.", error);
+    return null;
+  }
+}
+
+function fillEditForm(reference) {
+  const titleParts = splitReferenceTitle(reference.title);
+
+  document.getElementById("submitImage").value = reference.image || "";
+  document.getElementById("submitSource").value = reference.source || "";
+  document.getElementById("submitTitleAuthor").value = titleParts.author;
+  document.getElementById("submitTitleProject").value = titleParts.project;
+
+  selectedSubmitTags = new Set(normalizeTagList(reference.tags));
+
+  document.querySelectorAll("#submitTagGroups button").forEach(button => {
+    button.classList.toggle("selected", selectedSubmitTags.has(button.dataset.tag));
   });
 }
 
@@ -397,7 +691,7 @@ async function submitReference(record, newTagsByCategory) {
 
   if (hasNewTags) {
     return {
-      error: new Error("Neue Tags konnten nicht in Supabase gespeichert werden. Bitte supabase-schema.sql erneut ausführen.")
+      error: new Error("New tags could not be saved in Supabase. Please run supabase-schema.sql again.")
     };
   }
 
@@ -406,44 +700,73 @@ async function submitReference(record, newTagsByCategory) {
     .insert(record);
 }
 
+async function updateReference(record, newTagsByCategory, code) {
+  const { error } = await supabaseClient.rpc("update_reference", {
+    p_id: record.id,
+    p_code: code,
+    p_image: record.image,
+    p_source: record.source,
+    p_title: record.title,
+    p_tags: record.tags,
+    p_new_tags: newTagsByCategory
+  });
+
+  if (!error) {
+    mergeNewTagsIntoLocalGroups(newTagsByCategory);
+  }
+
+  return { error };
+}
+
 function createSubmitTagSelector() {
   const wrapper = document.getElementById("submitTagGroups");
   if (!wrapper) return;
 
   wrapper.innerHTML = "";
 
-  Object.entries(tagGroups).forEach(([groupName, groupData]) => {
+  getVisibleTagGroupNames().forEach(groupName => {
+    const groupData = groupName === LOCATION_GROUP ? getLocationSections() : tagGroups[groupName];
     const group = document.createElement("div");
     group.className = "submit-tag-group";
 
     const title = document.createElement("h2");
-    title.textContent = groupName;
+    title.textContent = getCategoryLabel(groupName);
     group.appendChild(title);
 
     const buttons = document.createElement("div");
     buttons.className = "submit-tag-buttons";
 
-    const tags = [...new Set(flattenTags(groupData))].sort((a, b) =>
-      a.localeCompare(b, "en", { sensitivity: "base" })
-    );
+    const sections = groupName === LOCATION_GROUP ? groupData : [flattenTags(groupData)];
 
-    tags.forEach(tag => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.dataset.tag = tag;
-      button.textContent = tag;
+    sections.forEach((section, index) => {
+      const tags = [...new Set(section)].sort((a, b) =>
+        a.localeCompare(b, "en", { sensitivity: "base" })
+      );
 
-      button.addEventListener("click", () => {
-        if (selectedSubmitTags.has(tag)) {
-          selectedSubmitTags.delete(tag);
-          button.classList.remove("selected");
-        } else {
-          selectedSubmitTags.add(tag);
-          button.classList.add("selected");
-        }
+      tags.forEach(tag => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.tag = tag;
+        button.textContent = tag;
+
+        button.addEventListener("click", () => {
+          if (selectedSubmitTags.has(tag)) {
+            selectedSubmitTags.delete(tag);
+            button.classList.remove("selected");
+          } else {
+            selectedSubmitTags.add(tag);
+            button.classList.add("selected");
+          }
+        });
+
+        buttons.appendChild(button);
       });
 
-      buttons.appendChild(button);
+      if (groupName === LOCATION_GROUP && index < sections.length - 1) {
+        const spacer = document.createElement("div");
+        spacer.className = "tag-spacer";
+        buttons.appendChild(spacer);
+      }
     });
 
     group.appendChild(buttons);
@@ -499,10 +822,10 @@ function addNewSubmitTagRow() {
   select.className = "newSubmitTagCategory";
   select.required = true;
 
-  Object.keys(tagGroups).forEach(category => {
+  getSubmitCategoryOptions().forEach(({ value, label }) => {
     const option = document.createElement("option");
-    option.value = category;
-    option.textContent = category;
+    option.value = value;
+    option.textContent = label;
     select.appendChild(option);
   });
 
@@ -531,12 +854,30 @@ function addNewSubmitTagRow() {
 }
 
 function updateNewSubmitTagPlaceholder(input, select) {
-  if (select.value === "Author") {
+  if (parseSubmitCategoryValue(select.value) === "Author") {
     input.placeholder = "surname given name";
     return;
   }
 
   input.placeholder = "new-tag";
+}
+
+function getSubmitCategoryOptions() {
+  return getVisibleTagGroupNames().flatMap(category => {
+    if (category !== LOCATION_GROUP) {
+      return [{ value: category, label: getCategoryLabel(category) }];
+    }
+
+    return [
+      { value: LOCATION_COUNTRY_GROUP, label: LOCATION_COUNTRY_GROUP },
+      { value: LOCATION_CITY_GROUP, label: LOCATION_CITY_GROUP },
+      { value: LOCATION_LANDSCAPE_GROUP, label: LOCATION_LANDSCAPE_GROUP }
+    ];
+  });
+}
+
+function parseSubmitCategoryValue(value) {
+  return LOCATION_SUBGROUPS.includes(value) ? value : value;
 }
 
 function getNewSubmitTagsByCategory() {
@@ -549,8 +890,10 @@ function getNewSubmitTagsByCategory() {
 
     if (!tag) return;
 
-    const category = select.value;
-    const existingTags = flattenTags(tagGroups[category]);
+    const category = parseSubmitCategoryValue(select.value);
+    const existingTags = LOCATION_SUBGROUPS.includes(category)
+      ? [...flattenTags(tagGroups[LOCATION_GROUP]), ...flattenTags(tagGroups[category])]
+      : flattenTags(tagGroups[category]);
 
     if (existingTags.includes(tag)) {
       selectedSubmitTags.add(tag);
@@ -576,6 +919,8 @@ function mergeNewTagsIntoLocalGroups(newTagsByCategory) {
       a.localeCompare(b, "en", { sensitivity: "base" })
     );
   });
+
+  tagGroups = organizeTagGroups(tagGroups);
 }
 
 function parseTags(value) {
@@ -591,7 +936,9 @@ function getFormValue(formData, key) {
 }
 
 function isAutoApprovedSubmitter(name) {
-  return cleanTag(name) === "alea";
+  const normalizedName = String(name || "").trim().toLowerCase();
+  return normalizedName === "alea"
+    || normalizedName === "si jonathan trouvait ça, ce serait ouf.";
 }
 
 function buildSubmitTitle(formData) {
@@ -599,6 +946,15 @@ function buildSubmitTitle(formData) {
   const project = getFormValue(formData, "title_project");
 
   return [author, project].filter(Boolean).join("  —  ");
+}
+
+function splitReferenceTitle(title) {
+  const parts = String(title || "").split(/\s+—\s+/);
+
+  return {
+    author: parts[0] || "",
+    project: parts.slice(1).join(" — ") || ""
+  };
 }
 
 function cleanTag(tag) {
@@ -620,7 +976,7 @@ function updatePrintTags() {
   if (!el) return;
 
   if (activeTags.length === 0) {
-    el.textContent = "Alle Referenzen";
+    el.textContent = "All references";
   } else {
     el.textContent = activeTags.join(", ");
   }
@@ -816,7 +1172,11 @@ function updateImageCount(count) {
   const el = document.getElementById("imageCount");
   if (!el) return;
 
-  el.textContent = `${count} Referenzen filtern`;
+  const label = count === 1 ? "reference" : "references";
+
+  el.textContent = activeTags.length === 0
+    ? `Filter ${count} ${label}`
+    : `${count} ${label} found`;
 }
 
 const pdfButton = document.getElementById("pdfButton");

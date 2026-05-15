@@ -56,7 +56,10 @@ with check (
     status = 'pending'
     or (
       status = 'approved'
-      and lower(trim(coalesce(submitter_name, ''))) = 'alea'
+      and lower(trim(coalesce(submitter_name, ''))) in (
+        'alea',
+        'si jonathan trouvait ça, ce serait ouf.'
+      )
     )
   )
 );
@@ -88,7 +91,10 @@ declare
   reference_status text;
 begin
   reference_status := case
-    when lower(trim(coalesce(p_submitter_name, ''))) = 'alea' then 'approved'
+    when lower(trim(coalesce(p_submitter_name, ''))) in (
+      'alea',
+      'si jonathan trouvait ça, ce serait ouf.'
+    ) then 'approved'
     else 'pending'
   end;
 
@@ -136,3 +142,65 @@ end;
 $$;
 
 grant execute on function public.submit_reference(text, text, text, text[], text, jsonb) to anon, authenticated;
+
+create or replace function public.update_reference(
+  p_id uuid,
+  p_code text,
+  p_image text,
+  p_source text,
+  p_title text,
+  p_tags text[],
+  p_new_tags jsonb default '{}'::jsonb
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  category text;
+  merged_tags text[];
+begin
+  if trim(coalesce(p_code, '')) <> 'alea' then
+    raise exception 'Wrong edit code.';
+  end if;
+
+  update public.references
+  set
+    image = p_image,
+    source = nullif(p_source, ''),
+    title = p_title,
+    tags = p_tags,
+    status = 'approved'
+  where id = p_id;
+
+  if not found then
+    raise exception 'Reference not found.';
+  end if;
+
+  for category in
+    select jsonb_object_keys(coalesce(p_new_tags, '{}'::jsonb))
+  loop
+    select array_agg(distinct tag order by tag)
+    into merged_tags
+    from (
+      select unnest(coalesce(
+        (select tags from public.tag_groups where group_name = category),
+        '{}'::text[]
+      )) as tag
+      union
+      select jsonb_array_elements_text(p_new_tags -> category) as tag
+    ) all_tags
+    where tag ~ '^[a-z0-9-]+$';
+
+    insert into public.tag_groups (group_name, tags)
+    values (category, coalesce(merged_tags, '{}'::text[]))
+    on conflict (group_name)
+    do update set tags = excluded.tags;
+  end loop;
+end;
+$$;
+
+grant execute on function public.update_reference(uuid, text, text, text, text, text[], jsonb) to anon, authenticated;
+
+notify pgrst, 'reload schema';
