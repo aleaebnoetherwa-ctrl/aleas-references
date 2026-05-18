@@ -385,23 +385,26 @@ function organizeTagGroups(groups) {
 function getLocationSections(groups = tagGroups) {
   const sections = [new Set(), new Set(), new Set()];
   const locationTags = normalizeTagList(flattenTags(groups[LOCATION_GROUP]));
+  const countryTags = new Set(normalizeTagList(groups[LOCATION_COUNTRY_GROUP]));
+  const cityTags = new Set(normalizeTagList(groups[LOCATION_CITY_GROUP]));
+  const landscapeTags = new Set(normalizeTagList(groups[LOCATION_LANDSCAPE_GROUP]));
 
   locationTags.forEach(tag => {
-    sections[getLocationSectionIndex(tag)].add(tag);
+    sections[getLocationSectionIndex(tag, cityTags, landscapeTags)].add(tag);
   });
 
-  normalizeTagList(groups[LOCATION_COUNTRY_GROUP]).forEach(tag => sections[0].add(tag));
-  normalizeTagList(groups[LOCATION_CITY_GROUP]).forEach(tag => sections[1].add(tag));
-  normalizeTagList(groups[LOCATION_LANDSCAPE_GROUP]).forEach(tag => sections[2].add(tag));
+  countryTags.forEach(tag => sections[0].add(tag));
+  cityTags.forEach(tag => sections[1].add(tag));
+  landscapeTags.forEach(tag => sections[2].add(tag));
 
   return sections.map(section =>
     [...section].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))
   );
 }
 
-function getLocationSectionIndex(tag) {
-  if (LOCATION_CITIES.has(tag)) return 1;
-  if (LOCATION_LANDSCAPES.has(tag)) return 2;
+function getLocationSectionIndex(tag, cityTags = new Set(), landscapeTags = new Set()) {
+  if (cityTags.has(tag) || LOCATION_CITIES.has(tag)) return 1;
+  if (landscapeTags.has(tag) || LOCATION_LANDSCAPES.has(tag)) return 2;
   return 0;
 }
 
