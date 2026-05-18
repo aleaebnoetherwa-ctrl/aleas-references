@@ -4,7 +4,6 @@
 
 let items = [];
 let tagGroups = {};
-let supabaseClient = null;
 
 
 /* =========================
@@ -36,6 +35,11 @@ const CATEGORY_LABELS = {
 };
 const EDIT_CODE = "alea";
 const EDIT_CODE_STORAGE_KEY = "alea-reference-edit-code";
+const TITLE_FIRST_NAME_HINTS = new Set([
+  "adolf", "alvar", "bernard", "christian", "giacomo", "giancarlo", "giuseppe",
+  "gordon", "inger", "jean-philippe", "johannes", "leonardo", "ludwig",
+  "nicola", "nicolas", "peter", "rene", "renzo", "richard", "valerio"
+]);
 
 
 /* =========================
@@ -45,31 +49,141 @@ const EDIT_CODE_STORAGE_KEY = "alea-reference-edit-code";
 init();
 
 async function init() {
-  const data = await loadReferenceData();
-  items = data.items;
-  tagGroups = organizeTagGroups(data.tagGroups);
+  const remoteData = await loadRemoteReferenceDataWhenReady();
+  applyReferenceData(remoteData || { items: [], tagGroups: {} });
+  initializePage();
+}
 
-  generateGallery();
-  images = document.querySelectorAll(".gallery .item");
-  generateButtons();
-  initFilterCategories();
-  initFilterControls();
-  initSubmitForm();
-  initTagSearches();
-  initMobileNotice();
-  updatePrintTags();
+function runInitStep(name, fn) {
+  try {
+    fn();
+  } catch (error) {
+    console.error(`Could not initialize ${name}.`, error);
+  }
 }
 
 function createSupabaseClient() {
   const config = window.supabaseConfig || {};
-  const hasConfig = config.url && config.anonKey;
-  const hasLibrary = window.supabase && window.supabase.createClient;
+  return Boolean(config.url && config.anonKey);
+}
 
-  if (!hasConfig || !hasLibrary) {
-    return null;
+function getSupabaseConfig() {
+  const config = window.supabaseConfig || {};
+  const url = String(config.url || "").replace(/\/$/, "");
+  const anonKey = String(config.anonKey || "");
+
+  if (!url || !anonKey) {
+    throw new Error("Supabase is not configured.");
   }
 
-  return window.supabase.createClient(config.url, config.anonKey);
+  return { url, anonKey };
+}
+
+function getSupabaseHeaders(extraHeaders = {}) {
+  const { anonKey } = getSupabaseConfig();
+
+  return {
+    apikey: anonKey,
+    Authorization: `Bearer ${anonKey}`,
+    ...extraHeaders
+  };
+}
+
+async function supabaseGet(path, query = {}) {
+  const { url } = getSupabaseConfig();
+  const requestUrl = new URL(`${url}/rest/v1/${path}`);
+
+  Object.entries(query).forEach(([key, value]) => {
+    requestUrl.searchParams.set(key, value);
+  });
+
+  const response = await fetch(requestUrl.toString(), {
+    headers: getSupabaseHeaders()
+  });
+
+  if (!response.ok) {
+    throw new Error(await getSupabaseErrorMessage(response));
+  }
+
+  return response.json();
+}
+
+async function supabaseRpc(functionName, payload) {
+  const { url } = getSupabaseConfig();
+  const response = await fetch(`${url}/rest/v1/rpc/${functionName}`, {
+    method: "POST",
+    headers: getSupabaseHeaders({
+      "Content-Type": "application/json"
+    }),
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    return { data: null, error: new Error(await getSupabaseErrorMessage(response)) };
+  }
+
+  const text = await response.text();
+  return {
+    data: text ? JSON.parse(text) : null,
+    error: null
+  };
+}
+
+async function supabaseInsert(table, record) {
+  const { url } = getSupabaseConfig();
+  const response = await fetch(`${url}/rest/v1/${table}`, {
+    method: "POST",
+    headers: getSupabaseHeaders({
+      "Content-Type": "application/json",
+      Prefer: "return=minimal"
+    }),
+    body: JSON.stringify(record)
+  });
+
+  if (!response.ok) {
+    return { error: new Error(await getSupabaseErrorMessage(response)) };
+  }
+
+  return { error: null };
+}
+
+async function getSupabaseErrorMessage(response) {
+  const text = await response.text();
+
+  try {
+    const data = JSON.parse(text);
+    return data.message || data.error || text || response.statusText;
+  } catch (error) {
+    return text || response.statusText;
+  }
+}
+
+function applyReferenceData(data) {
+  items = data.items || [];
+  tagGroups = organizeTagGroups(data.tagGroups || {});
+}
+
+function initializePage() {
+  runInitStep("gallery", generateGallery);
+  images = document.querySelectorAll(".gallery .item");
+  runInitStep("filter buttons", generateButtons);
+  runInitStep("filter categories", initFilterCategories);
+  runInitStep("filter controls", initFilterControls);
+  runInitStep("tag searches", initTagSearches);
+  runInitStep("submit form", initSubmitForm);
+  runInitStep("submit guide", initSubmitGuide);
+  runInitStep("mobile notice", initMobileNotice);
+  runInitStep("print tags", updatePrintTags);
+}
+
+function refreshRenderedReferenceData() {
+  runInitStep("gallery", generateGallery);
+  images = document.querySelectorAll(".gallery .item");
+  runInitStep("filter buttons", generateButtons);
+  runInitStep("submit tag selector", createSubmitTagSelector);
+  runInitStep("submit field suggestions", initSubmitFieldSuggestions);
+  updateFilterActionVisibility();
+  filterImages();
 }
 
 function initMobileNotice() {
@@ -115,69 +229,79 @@ function initMobileNotice() {
   document.body.appendChild(notice);
 }
 
-async function loadReferenceData() {
-  const fallbackData = window.referenceData || { items: [], tagGroups: {} };
-  supabaseClient = createSupabaseClient();
-
-  if (!supabaseClient) {
-    return fallbackData;
+async function loadRemoteReferenceData() {
+  if (!createSupabaseClient()) {
+    return null;
   }
 
   try {
-    const [{ data: references, error: referencesError }, { data: groups, error: groupsError }] =
-      await Promise.all([
-        supabaseClient
-          .from("references")
-          .select("id, image, source, title, tags")
-          .eq("status", "approved")
-          .order("created_at", { ascending: false }),
-        supabaseClient
-          .from("tag_groups")
-          .select("group_name, tags")
-          .order("sort_order", { ascending: true })
-      ]);
-
-    if (referencesError) throw referencesError;
-    if (groupsError) throw groupsError;
+    const [references, groups] = await Promise.all([
+      supabaseGet("references", {
+        select: "id,image,source,title,tags,created_at",
+        status: "eq.approved",
+        order: "created_at.desc"
+      }),
+      supabaseGet("tag_groups", {
+        select: "group_name,tags",
+        order: "sort_order.asc"
+      })
+    ]);
 
     return {
-      items: mergeReferenceItems(fallbackData.items, references || []),
-      tagGroups: buildTagGroups(groups, fallbackData.tagGroups)
+      items: normalizeReferenceItems(references || []),
+      tagGroups: buildTagGroups(groups)
     };
   } catch (error) {
-    console.warn("Could not load Supabase data. Falling back to data.js.", error);
-    return fallbackData;
+    console.warn("Could not load Supabase data.", error);
+    return null;
   }
 }
 
-function buildTagGroups(groups, fallbackGroups) {
-  const mergedGroups = normalizeTagGroups(fallbackGroups);
+async function loadRemoteReferenceDataWhenReady() {
+  return loadRemoteReferenceData();
+}
+
+function buildTagGroups(groups) {
+  const mergedGroups = {};
 
   if (!groups || groups.length === 0) {
     return mergedGroups;
   }
 
   return groups.reduce((result, group) => {
-    result[group.group_name] = normalizeTagList(group.tags);
+    result[group.group_name] = mergeTagGroupData(
+      result[group.group_name],
+      normalizeTagList(group.tags)
+    );
     return result;
   }, mergedGroups);
 }
 
-function mergeReferenceItems(localItems, remoteItems) {
-  const mergedItems = localItems.map(normalizeReferenceItem);
-  const knownKeys = new Set(localItems.map(item => getReferenceKey(item)));
+function mergeTagGroupData(existingGroupData, incomingTags) {
+  const mergedTags = [...new Set([
+    ...flattenTags(existingGroupData),
+    ...normalizeTagList(incomingTags)
+  ])].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
 
-  remoteItems.forEach(item => {
-    const normalizedItem = normalizeReferenceItem(item);
-    const key = getReferenceKey(normalizedItem);
+  if (Array.isArray(existingGroupData) && Array.isArray(existingGroupData[0])) {
+    return existingGroupData.map((section, index) => {
+      const sectionTags = index === 0
+        ? mergedTags.filter(tag => getLocationSectionIndex(tag) === 0)
+        : index === 1
+          ? mergedTags.filter(tag => getLocationSectionIndex(tag) === 1)
+          : mergedTags.filter(tag => getLocationSectionIndex(tag) === 2);
 
-    if (!knownKeys.has(key)) {
-      mergedItems.push(normalizedItem);
-      knownKeys.add(key);
-    }
-  });
+      return normalizeTagList(sectionTags).sort((a, b) =>
+        a.localeCompare(b, "en", { sensitivity: "base" })
+      );
+    });
+  }
 
-  return mergedItems;
+  return mergedTags;
+}
+
+function normalizeReferenceItems(referenceItems) {
+  return referenceItems.map(normalizeReferenceItem);
 }
 
 function getReferenceKey(item) {
@@ -190,10 +314,20 @@ function flattenTags(groupData) {
   }
 
   if (Array.isArray(groupData[0])) {
-    return groupData.flat();
+    return groupData.reduce((allTags, section) => allTags.concat(section), []);
   }
 
   return groupData;
+}
+
+function listIncludes(list, value) {
+  return Array.isArray(list) && list.indexOf(value) !== -1;
+}
+
+function getNewTagValues(newTagsByCategory) {
+  return Object.keys(newTagsByCategory).reduce((allTags, category) => {
+    return allTags.concat(newTagsByCategory[category]);
+  }, []);
 }
 
 function normalizeReferenceItem(item) {
@@ -220,12 +354,18 @@ function normalizeTagList(tags) {
 }
 
 function getAllTagEntries() {
-  return getVisibleTagGroupNames().flatMap(category => {
+  const entries = [];
+
+  getVisibleTagGroupNames().forEach(category => {
     const groupData = category === LOCATION_GROUP ? getLocationSections() : tagGroups[category];
 
-    return [...new Set(flattenTags(groupData).map(tag => cleanTag(tag)).filter(Boolean))]
-      .map(tag => ({ category: getCategoryLabel(category), tag }));
-  }).sort((a, b) => a.tag.localeCompare(b.tag, "en", { sensitivity: "base" }));
+    [...new Set(flattenTags(groupData).map(tag => cleanTag(tag)).filter(Boolean))]
+      .forEach(tag => {
+        entries.push({ category: getCategoryLabel(category), tag });
+      });
+  });
+
+  return entries.sort((a, b) => a.tag.localeCompare(b.tag, "en", { sensitivity: "base" }));
 }
 
 function getCategoryLabel(category) {
@@ -233,7 +373,7 @@ function getCategoryLabel(category) {
 }
 
 function getVisibleTagGroupNames() {
-  return Object.keys(tagGroups).filter(category => !LOCATION_SUBGROUPS.includes(category));
+  return Object.keys(tagGroups).filter(category => !listIncludes(LOCATION_SUBGROUPS, category));
 }
 
 function organizeTagGroups(groups) {
@@ -244,10 +384,7 @@ function organizeTagGroups(groups) {
 
 function getLocationSections(groups = tagGroups) {
   const sections = [new Set(), new Set(), new Set()];
-  const hasLocationSubgroups = LOCATION_SUBGROUPS.some(groupName => groups[groupName]);
-  const locationTags = hasLocationSubgroups
-    ? normalizeTagList(groups[LOCATION_GROUP])
-    : normalizeTagList(flattenTags(groups[LOCATION_GROUP]));
+  const locationTags = normalizeTagList(flattenTags(groups[LOCATION_GROUP]));
 
   locationTags.forEach(tag => {
     sections[getLocationSectionIndex(tag)].add(tag);
@@ -329,19 +466,18 @@ function initTagSearch({ inputId, suggestionsId, onSelect }) {
   if (!input || !suggestions) return;
 
   input.addEventListener("input", () => {
-    activeIndex = -1;
-    renderTagSuggestions(input, suggestions, onSelect);
+    activeIndex = renderTagSuggestions(input, suggestions, onSelect);
   });
 
   input.addEventListener("focus", () => {
-    renderTagSuggestions(input, suggestions, onSelect);
+    activeIndex = renderTagSuggestions(input, suggestions, onSelect);
   });
 
   input.addEventListener("keydown", (event) => {
     if (event.key === "ArrowDown") {
       event.preventDefault();
       if (!suggestions.classList.contains("open")) {
-        renderTagSuggestions(input, suggestions, onSelect);
+        activeIndex = renderTagSuggestions(input, suggestions, onSelect);
       }
       const buttons = [...suggestions.querySelectorAll("button")];
       if (!buttons.length) return;
@@ -352,7 +488,7 @@ function initTagSearch({ inputId, suggestionsId, onSelect }) {
     if (event.key === "ArrowUp") {
       event.preventDefault();
       if (!suggestions.classList.contains("open")) {
-        renderTagSuggestions(input, suggestions, onSelect);
+        activeIndex = renderTagSuggestions(input, suggestions, onSelect);
       }
       const buttons = [...suggestions.querySelectorAll("button")];
       if (!buttons.length) return;
@@ -386,7 +522,9 @@ function updateActiveSuggestion(buttons, activeIndex) {
     button.classList.toggle("active", index === activeIndex);
   });
 
-  buttons[activeIndex]?.scrollIntoView({ block: "nearest" });
+  if (buttons[activeIndex]) {
+    buttons[activeIndex].scrollIntoView({ block: "nearest" });
+  }
 }
 
 function renderTagSuggestions(input, suggestions, onSelect) {
@@ -395,11 +533,11 @@ function renderTagSuggestions(input, suggestions, onSelect) {
 
   if (query.length === 0) {
     suggestions.classList.remove("open");
-    return;
+    return -1;
   }
 
   const matches = getAllTagEntries()
-    .filter(({ tag }) => tag.includes(query))
+    .filter(({ tag }) => tag.indexOf(query) !== -1)
     .slice(0, 12);
 
   matches.forEach(({ category, tag }) => {
@@ -426,6 +564,9 @@ function renderTagSuggestions(input, suggestions, onSelect) {
   });
 
   suggestions.classList.toggle("open", matches.length > 0);
+  const activeIndex = matches.length > 0 ? 0 : -1;
+  updateActiveSuggestion([...suggestions.querySelectorAll("button")], activeIndex);
+  return activeIndex;
 }
 
 function cleanSearchQuery(value) {
@@ -527,8 +668,9 @@ function initSubmitForm() {
   const status = document.getElementById("submitStatus");
   const isEditMode = document.body.classList.contains("edit-page");
   selectedSubmitTags = new Set();
-  createSubmitTagSelector();
-  initNewSubmitTags();
+  runInitStep("submit tag selector", createSubmitTagSelector);
+  runInitStep("submit field suggestions", initSubmitFieldSuggestions);
+  runInitStep("new submit tags", initNewSubmitTags);
 
   if (isEditMode) {
     initEditForm(form, status);
@@ -538,14 +680,14 @@ function initSubmitForm() {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    if (!supabaseClient) {
+    if (!createSupabaseClient()) {
       setSubmitStatus(status, "Supabase is not configured yet.");
       return;
     }
 
     const formData = new FormData(form);
     const newTagsByCategory = getNewSubmitTagsByCategory();
-    const newTags = Object.values(newTagsByCategory).flat();
+    const newTags = getNewTagValues(newTagsByCategory);
     const tags = [...new Set([...selectedSubmitTags, ...newTags])];
 
     const record = {
@@ -588,6 +730,168 @@ function initSubmitForm() {
   });
 }
 
+function initSubmitGuide() {
+  const prompt = document.getElementById("tagPromptText");
+  const copyButton = document.getElementById("copyTagPrompt");
+  const status = document.getElementById("copyTagPromptStatus");
+
+  initProjectCheckSearch();
+
+  if (!prompt) return;
+
+  prompt.value = buildTagHelpPrompt();
+
+  if (!copyButton) return;
+
+  copyButton.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(prompt.value);
+      setSubmitStatus(status, "Prompt copied.");
+    } catch (error) {
+      prompt.select();
+      document.execCommand("copy");
+      setSubmitStatus(status, "Prompt copied.");
+    }
+  });
+}
+
+function initProjectCheckSearch() {
+  const input = document.getElementById("projectCheckSearch");
+  const results = document.getElementById("projectCheckResults");
+
+  if (!input || !results) return;
+
+  renderProjectCheckResults(input.value, results);
+
+  input.addEventListener("input", () => {
+    renderProjectCheckResults(input.value, results);
+  });
+}
+
+function renderProjectCheckResults(query, results) {
+  const search = normalizeSearchText(query);
+  results.innerHTML = "";
+
+  if (!search) {
+    const empty = document.createElement("p");
+    empty.textContent = "Existing matches will appear here.";
+    results.appendChild(empty);
+    return;
+  }
+
+  const matches = items
+    .filter(item => getProjectSearchText(item).includes(search))
+    .slice(0, 6);
+
+  if (matches.length === 0) {
+    const empty = document.createElement("p");
+    empty.textContent = "No approved reference found for this search.";
+    results.appendChild(empty);
+    return;
+  }
+
+  const list = document.createElement("ul");
+
+  matches.forEach(item => {
+    const row = document.createElement("li");
+    const thumbnail = document.createElement("img");
+    const details = document.createElement("div");
+    const title = item.source ? document.createElement("a") : document.createElement("span");
+    const tags = document.createElement("small");
+
+    thumbnail.className = "project-check-thumb";
+    thumbnail.alt = "";
+    thumbnail.loading = "lazy";
+    thumbnail.src = item.image || "";
+    thumbnail.addEventListener("error", () => {
+      thumbnail.style.visibility = "hidden";
+    });
+
+    title.textContent = item.title || "Untitled reference";
+
+    if (item.source) {
+      title.href = item.source;
+      title.target = "_blank";
+      title.rel = "noopener noreferrer";
+    }
+
+    tags.textContent = normalizeTagList(item.tags).slice(0, 8).join(", ");
+
+    details.appendChild(title);
+    if (tags.textContent) details.appendChild(tags);
+    row.appendChild(thumbnail);
+    row.appendChild(details);
+    list.appendChild(row);
+  });
+
+  results.appendChild(list);
+}
+
+function getProjectSearchText(item) {
+  const titleParts = splitReferenceTitle(item.title);
+
+  return normalizeSearchText([
+    item.title,
+    titleParts.author,
+    titleParts.project,
+    item.source,
+    ...(item.tags || [])
+  ].join(" "));
+}
+
+function normalizeSearchText(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+function buildTagHelpPrompt() {
+  const tagTemplate = getPromptTagTemplate();
+
+  return `Task: Suggest precise tags for architecture projects and architecture images.
+
+Goal:
+Choose suitable tags for one specific project, image, drawing, detail, or reference. The tagging should describe the visible motif as accurately as possible while using project information for context. Do not over-describe the whole project if an aspect is not visible or not relevant in the image.
+
+Available existing tags:
+${tagTemplate}
+
+Instructions:
+- Prefer existing tags from the list above.
+- Add new tags only when they are genuinely useful, for example when an author, place, typology, material, element, form, color, or key theme is missing.
+- Clearly mark every new tag as "new".
+- Avoid long lists of similar, vague, or redundant tags.
+- Briefly research or verify the author, location, typology, key themes, and context when a project link or title is available.
+- If image information and project information are both available, the visible image has priority. Project information should only help with context.
+- Use lowercase kebab-case for final tags, for example concrete, social-housing, zumthor-peter.
+
+Response structure:
+1. Short contextual note, only if helpful.
+2. Suggested existing tags by category.
+3. New tags, separately marked as "new", only if needed.
+4. Compact final tag list.
+
+Now tag this reference:`;
+}
+
+function getPromptTagTemplate() {
+  const lines = [];
+
+  getVisibleTagGroupNames().forEach(category => {
+    const groupData = category === LOCATION_GROUP ? getLocationSections() : tagGroups[category];
+    const tags = [...new Set(flattenTags(groupData))]
+      .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+
+    if (tags.length === 0) return;
+
+    lines.push(`${getCategoryLabel(category)}: ${tags.join(", ")}`);
+  });
+
+  return lines.length ? lines.join("\n") : "No existing tags are available yet.";
+}
+
 function initEditForm(form, status) {
   const referenceId = new URLSearchParams(window.location.search).get("id");
   const code = getStoredEditCode();
@@ -612,14 +916,14 @@ function initEditForm(form, status) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    if (!supabaseClient) {
+    if (!createSupabaseClient()) {
       setSubmitStatus(status, "Supabase is not configured yet.");
       return;
     }
 
     const formData = new FormData(form);
     const newTagsByCategory = getNewSubmitTagsByCategory();
-    const newTags = Object.values(newTagsByCategory).flat();
+    const newTags = getNewTagValues(newTagsByCategory);
     const tags = [...new Set([...selectedSubmitTags, ...newTags])];
 
     const record = {
@@ -674,9 +978,9 @@ function fillEditForm(reference) {
 }
 
 async function submitReference(record, newTagsByCategory) {
-  const hasNewTags = Object.values(newTagsByCategory).some(tags => tags.length > 0);
+  const hasNewTags = getNewTagValues(newTagsByCategory).length > 0;
 
-  const { error: rpcError } = await supabaseClient.rpc("submit_reference", {
+  const { error: rpcError } = await supabaseRpc("submit_reference", {
     p_image: record.image,
     p_source: record.source,
     p_title: record.title,
@@ -698,13 +1002,11 @@ async function submitReference(record, newTagsByCategory) {
     };
   }
 
-  return supabaseClient
-    .from("references")
-    .insert(record);
+  return supabaseInsert("references", record);
 }
 
 async function updateReference(record, newTagsByCategory, code) {
-  const { error } = await supabaseClient.rpc("update_reference", {
+  const { error } = await supabaseRpc("update_reference", {
     p_id: record.id,
     p_code: code,
     p_image: record.image,
@@ -751,6 +1053,7 @@ function createSubmitTagSelector() {
         button.type = "button";
         button.dataset.tag = tag;
         button.textContent = tag;
+        button.classList.toggle("selected", selectedSubmitTags.has(tag));
 
         button.addEventListener("click", () => {
           if (selectedSubmitTags.has(tag)) {
@@ -806,6 +1109,10 @@ function resetNewSubmitTags() {
   const wrapper = document.getElementById("newSubmitTagRows");
   if (!wrapper) return;
 
+  document.querySelectorAll('datalist[id^="newSubmitTagSuggestions-"]').forEach(datalist => {
+    datalist.remove();
+  });
+
   wrapper.innerHTML = "";
   addNewSubmitTagRow();
 }
@@ -820,6 +1127,7 @@ function addNewSubmitTagRow() {
   const input = document.createElement("input");
   input.className = "newSubmitTagInput";
   input.placeholder = "new-tag";
+  input.setAttribute("autocomplete", "off");
 
   const select = document.createElement("select");
   select.className = "newSubmitTagCategory";
@@ -841,9 +1149,11 @@ function addNewSubmitTagRow() {
 
   select.addEventListener("change", () => {
     updateNewSubmitTagPlaceholder(input, select);
+    updateNewSubmitTagDatalist(input, select);
   });
 
   updateNewSubmitTagPlaceholder(input, select);
+  updateNewSubmitTagDatalist(input, select);
 
   const removeButton = document.createElement("button");
   removeButton.type = "button";
@@ -856,6 +1166,96 @@ function addNewSubmitTagRow() {
   wrapper.appendChild(row);
 }
 
+function initSubmitFieldSuggestions() {
+  setInputDatalist("submitImage", "submitImageSuggestions", getUniqueItemValues(item => item.image));
+  setInputDatalist("submitSource", "submitSourceSuggestions", getUniqueItemValues(item => item.source));
+
+  const titleParts = items.map(item => splitReferenceTitle(item.title));
+  setInputDatalist("submitTitleAuthor", "submitAuthorSuggestions", getTitleAuthorSuggestions(titleParts));
+  setInputDatalist("submitTitleProject", "submitProjectSuggestions", getUniqueValues(
+    titleParts.map(part => part.project)
+  ));
+  setInputDatalist("submitterName", "submitterNameSuggestions", ["alea"]);
+}
+
+function setInputDatalist(inputId, datalistId, values) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  setElementDatalist(input, datalistId, values);
+}
+
+function setElementDatalist(input, datalistId, values) {
+  const datalist = getOrCreateDatalist(datalistId);
+  datalist.innerHTML = "";
+
+  getUniqueValues(values).slice(0, 250).forEach(value => {
+    const option = document.createElement("option");
+    option.value = value;
+    datalist.appendChild(option);
+  });
+
+  input.setAttribute("list", datalistId);
+}
+
+function getOrCreateDatalist(id) {
+  let datalist = document.getElementById(id);
+
+  if (!datalist) {
+    datalist = document.createElement("datalist");
+    datalist.id = id;
+    document.body.appendChild(datalist);
+  }
+
+  return datalist;
+}
+
+function getUniqueItemValues(getter) {
+  return getUniqueValues(items.map(item => getter(item)));
+}
+
+function getUniqueValues(values) {
+  return [...new Set((values || []).map(value => String(value || "").trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+}
+
+function getTitleAuthorSuggestions(titleParts) {
+  const authorTagSet = new Set(normalizeTagList(tagGroups.Author));
+  return getUniqueValues(titleParts.map(part => normalizeTitleAuthorName(part.author, authorTagSet)));
+}
+
+function normalizeTitleAuthorName(name, authorTagSet) {
+  const cleanName = String(name || "").trim();
+  if (!cleanName || /^https?:\/\//i.test(cleanName)) return "";
+
+  const parts = cleanName.split(/\s+/);
+  const lastPart = parts[parts.length - 1].toLowerCase();
+
+  if (parts.length === 2 && authorTagSet && authorTagSet.has(cleanTag(cleanName)) && TITLE_FIRST_NAME_HINTS.has(lastPart)) {
+    return `${parts[1]} ${parts[0]}`;
+  }
+
+  return cleanName;
+}
+
+function updateNewSubmitTagDatalist(input, select) {
+  if (!input || !select) return;
+
+  const datalistId = `newSubmitTagSuggestions-${Math.random().toString(36).slice(2)}`;
+  const previousDatalistId = input.getAttribute("list");
+  const previousDatalist = previousDatalistId ? document.getElementById(previousDatalistId) : null;
+  const category = parseSubmitCategoryValue(select.value);
+  const existingTags = listIncludes(LOCATION_SUBGROUPS, category)
+    ? [...flattenTags(tagGroups[LOCATION_GROUP]), ...flattenTags(tagGroups[category])]
+    : flattenTags(tagGroups[category]);
+
+  if (previousDatalist && previousDatalist.id.startsWith("newSubmitTagSuggestions-")) {
+    previousDatalist.remove();
+  }
+
+  setElementDatalist(input, datalistId, existingTags);
+}
+
 function updateNewSubmitTagPlaceholder(input, select) {
   if (parseSubmitCategoryValue(select.value) === "Author") {
     input.placeholder = "surname given name";
@@ -866,21 +1266,26 @@ function updateNewSubmitTagPlaceholder(input, select) {
 }
 
 function getSubmitCategoryOptions() {
-  return getVisibleTagGroupNames().flatMap(category => {
+  const options = [];
+
+  getVisibleTagGroupNames().forEach(category => {
     if (category !== LOCATION_GROUP) {
-      return [{ value: category, label: getCategoryLabel(category) }];
+      options.push({ value: category, label: getCategoryLabel(category) });
+      return;
     }
 
-    return [
+    options.push(
       { value: LOCATION_COUNTRY_GROUP, label: LOCATION_COUNTRY_GROUP },
       { value: LOCATION_CITY_GROUP, label: LOCATION_CITY_GROUP },
       { value: LOCATION_LANDSCAPE_GROUP, label: LOCATION_LANDSCAPE_GROUP }
-    ];
+    );
   });
+
+  return options;
 }
 
 function parseSubmitCategoryValue(value) {
-  return LOCATION_SUBGROUPS.includes(value) ? value : value;
+  return listIncludes(LOCATION_SUBGROUPS, value) ? value : value;
 }
 
 function getNewSubmitTagsByCategory() {
@@ -889,16 +1294,18 @@ function getNewSubmitTagsByCategory() {
   document.querySelectorAll(".new-submit-tag-row").forEach(row => {
     const input = row.querySelector(".newSubmitTagInput");
     const select = row.querySelector(".newSubmitTagCategory");
+    if (!input || !select) return;
+
     const tag = cleanTag(input.value);
 
     if (!tag) return;
 
     const category = parseSubmitCategoryValue(select.value);
-    const existingTags = LOCATION_SUBGROUPS.includes(category)
+    const existingTags = listIncludes(LOCATION_SUBGROUPS, category)
       ? [...flattenTags(tagGroups[LOCATION_GROUP]), ...flattenTags(tagGroups[category])]
       : flattenTags(tagGroups[category]);
 
-    if (existingTags.includes(tag)) {
+    if (listIncludes(existingTags, tag)) {
       selectedSubmitTags.add(tag);
       return;
     }
@@ -907,7 +1314,7 @@ function getNewSubmitTagsByCategory() {
       newTagsByCategory[category] = [];
     }
 
-    if (!newTagsByCategory[category].includes(tag)) {
+    if (!listIncludes(newTagsByCategory[category], tag)) {
       newTagsByCategory[category].push(tag);
     }
   });
@@ -924,6 +1331,7 @@ function mergeNewTagsIntoLocalGroups(newTagsByCategory) {
   });
 
   tagGroups = organizeTagGroups(tagGroups);
+  createSubmitTagSelector();
 }
 
 function parseTags(value) {
@@ -1043,18 +1451,23 @@ function createButton(tag, container) {
 function selectFilterTag(tag) {
   tag = cleanTag(tag);
 
-  if (!activeTags.includes(tag)) {
+  if (!listIncludes(activeTags, tag)) {
     activeTags.push(tag);
   }
 
-  document.querySelector(".filters")?.classList.add("open");
+  const filters = document.querySelector(".filters");
+  if (filters) {
+    filters.classList.add("open");
+  }
 
   document.querySelectorAll(".filters button").forEach(button => {
     if (button.dataset.tag !== tag) return;
     button.classList.add("selected");
 
-    const group = button.parentElement?.closest(".filter-group");
-    group?.classList.add("pinned");
+    const group = button.parentElement ? button.parentElement.closest(".filter-group") : null;
+    if (group) {
+      group.classList.add("pinned");
+    }
   });
 
   filterImages();
@@ -1072,7 +1485,7 @@ document.addEventListener("click", (e) => {
   const tag = button.dataset.tag;
   if (!tag) return;
 
-  if (activeTags.includes(tag)) {
+  if (listIncludes(activeTags, tag)) {
     activeTags = activeTags.filter(t => t !== tag);
     button.classList.remove("selected");
   } else {
@@ -1120,7 +1533,7 @@ function filterImages() {
       .split(" ")
       .map(tag => cleanTag(tag))
       .filter(Boolean);
-    const match = activeTags.every(tag => tags.includes(tag));
+    const match = activeTags.every(tag => listIncludes(tags, tag));
 
     if (activeTags.length === 0) {
       img.classList.remove("dim");
@@ -1146,8 +1559,16 @@ function filterImages() {
 function updateFilterActionVisibility() {
   const hasActiveTags = activeTags.length > 0;
 
-  document.getElementById("clearFilters")?.classList.toggle("visible", hasActiveTags);
-  document.getElementById("pdfButton")?.classList.toggle("visible", hasActiveTags);
+  const clearFilters = document.getElementById("clearFilters");
+  const pdfButtonElement = document.getElementById("pdfButton");
+
+  if (clearFilters) {
+    clearFilters.classList.toggle("visible", hasActiveTags);
+  }
+
+  if (pdfButtonElement) {
+    pdfButtonElement.classList.toggle("visible", hasActiveTags);
+  }
 }
 
 
@@ -1205,7 +1626,7 @@ function getPrintableItems() {
 
   return items.filter(item => {
     const tags = normalizeTagList(item.tags);
-    return activeTags.every(tag => tags.includes(tag));
+    return activeTags.every(tag => listIncludes(tags, tag));
   });
 }
 

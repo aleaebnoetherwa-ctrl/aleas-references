@@ -19,46 +19,80 @@
   </nav>
 
   <section class="submit-reference">
-    <form id="submitForm">
-      <label for="submitImage">Image URL</label>
-      <input id="submitImage" name="image" type="url" required placeholder="https://example.com/image.jpg">
+    <div class="submit-layout">
+      <form id="submitForm">
+        <label for="submitImage">Image URL</label>
+        <input id="submitImage" name="image" type="url" required placeholder="https://example.com/image.jpg">
 
-      <label for="submitSource">Source URL</label>
-      <input id="submitSource" name="source" type="url" placeholder="https://example.com/project-page/">
+        <label for="submitSource">Source URL</label>
+        <input id="submitSource" name="source" type="url" placeholder="https://example.com/project-page/">
 
-      <label>Title</label>
-      <div class="title-row submit-title-row">
-        <input id="submitTitleAuthor" name="title_author" required placeholder="Author">
-        <span class="title-separator">—</span>
-        <input id="submitTitleProject" name="title_project" required placeholder="Project Name">
-      </div>
-
-      <fieldset class="submit-tags">
-        <legend>Existing tags</legend>
-        <div class="tag-search submit-tag-search">
-          <label for="submitTagSearch">Search tags</label>
-          <input id="submitTagSearch" type="search" autocomplete="off" placeholder="type a tag">
-          <div id="submitTagSuggestions" class="tag-suggestions"></div>
+        <label>Title</label>
+        <div class="title-row submit-title-row">
+          <input id="submitTitleAuthor" name="title_author" required placeholder="Author">
+          <span class="title-separator">—</span>
+          <input id="submitTitleProject" name="title_project" required placeholder="Project Name">
         </div>
-        <div id="submitTagGroups"></div>
-      </fieldset>
 
-      <fieldset class="submit-tags">
-        <legend>New tags</legend>
-        <p class="submit-help">For new Author tags, enter surname first, then given name. Example: Zumthor Peter.</p>
-        <div id="newSubmitTagRows"></div>
-        <button id="addSubmitTagRow" type="button">Add new tag</button>
-      </fieldset>
+        <fieldset class="submit-tags">
+          <legend>Existing tags</legend>
+          <div class="tag-search submit-tag-search">
+            <label for="submitTagSearch">Search tags</label>
+            <input id="submitTagSearch" type="search" autocomplete="off" placeholder="type a tag">
+            <div id="submitTagSuggestions" class="tag-suggestions"></div>
+          </div>
+          <div id="submitTagGroups"></div>
+        </fieldset>
 
-      <label for="submitterName">Your name</label>
-      <input id="submitterName" name="submitter_name" placeholder="optional">
+        <fieldset class="submit-tags">
+          <legend>New tags</legend>
+          <p class="submit-help">For new Author tags, enter surname first, then given name. Example: Zumthor Peter.</p>
+          <div id="newSubmitTagRows"></div>
+          <button id="addSubmitTagRow" type="button">Add new tag</button>
+        </fieldset>
 
-      <button type="submit">Submit reference</button>
-      <p id="submitStatus" aria-live="polite"></p>
-    </form>
+        <label for="submitterName">Your name</label>
+        <input id="submitterName" name="submitter_name" placeholder="optional">
+
+        <button type="submit">Submit reference</button>
+        <p id="submitStatus" aria-live="polite"></p>
+      </form>
+
+      <aside class="submit-guide" aria-labelledby="submitGuideTitle">
+        <h2 id="submitGuideTitle">How to add a reference</h2>
+        <ol class="guide-steps">
+          <li>
+            <strong>Check first</strong>
+            <span>Search below to see whether the project or a similar image is already in the archive.</span>
+          </li>
+          <li>
+            <strong>Complete the form</strong>
+            <span>Fill in the fields on the left. If you need tag ideas or a second opinion, copy the ChatGPT prompt below and use it as guidance.</span>
+          </li>
+          <li>
+            <strong>Submit for review</strong>
+            <span>Submit the reference. It will be reviewed and approved within 24 hours at the latest.</span>
+          </li>
+        </ol>
+
+        <div class="project-check">
+          <h2>Check existing projects</h2>
+          <label for="projectCheckSearch">Search the archive before submitting</label>
+          <input id="projectCheckSearch" type="search" autocomplete="off" placeholder="Project, author, tag, or place">
+          <div id="projectCheckResults" class="project-check-results" aria-live="polite"></div>
+        </div>
+
+        <div class="prompt-tools">
+          <h2>Prompt for tag help</h2>
+          <p>Copy this prompt into ChatGPT, then add the image, project link, or your notes below it.</p>
+          <button id="copyTagPrompt" type="button">Copy prompt</button>
+          <p id="copyTagPromptStatus" aria-live="polite"></p>
+        </div>
+        <textarea id="tagPromptText" readonly spellcheck="false"></textarea>
+      </aside>
+    </div>
   </section>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="script.js"></script>
 

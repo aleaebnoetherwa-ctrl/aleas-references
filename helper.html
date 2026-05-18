@@ -135,7 +135,7 @@
   <button type="button" onclick="generate()">Generate</button>
 
   <div class="output-section">
-    <h3>1. Item block for data.js</h3>
+    <h3>1. Reference block</h3>
     <pre id="itemOutput"></pre>
     <button type="button" onclick="copyText('itemOutput')">Copy item block</button>
   </div>
@@ -146,10 +146,8 @@
     <button type="button" onclick="copyText('tagOutput')">Copy new tags only</button>
   </div>
 
-  <script src="data.js"></script>
   <script>
-    const referenceData = window.referenceData || { tagGroups: {} };
-    const { tagGroups } = referenceData;
+    const tagGroups = {};
 
     const selectedTags = new Set();
     let latestNewTagsOnly = "";

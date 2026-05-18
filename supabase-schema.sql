@@ -27,7 +27,16 @@ declare
 begin
   insert into public.tag_groups (group_name, tags, sort_order)
   values
+    ('Author', array['vaccaro-giuseppe', 'sauerbruch-hutton', 'mosso-nicola-leonardo', 'christ-gantenbein', 'smithson-alison-peter', 'mies-van-der-rohe-ludwig', 'loos-adolf', 'kerez-christian', 'zumthor-peter', 'dorval-bory-nicolas', 'archigram', 'libera-adalberto', 'deplazes-bearth', 'rogers-richard', 'r-architecture', 'vernacular', 'bruther', 'baukunst', 'enzmann-fischer-partner', 'buchner-bruendler', 'olgiati-valerio', 'maerkli-peter', 'lacaton-vassal', 'matta-clark-gordon', 'matte-trucco', 'piano-renzo', 'de-vylder-vinck-taillieu', 'tschumi-bernard', 'exner-inger-johannes', '127af', 'le-corbusier', 'herbst-rene'], 0),
     ('Location', countries, 1),
+    ('Typology', array['church', 'extension', 'interior', 'student-housing', 'parking', 'alternative-living', 'mixed-use', 'office', 'house', 'social-housing', 'housing', 'factory', 'museum', 'park', 'pavilion', 'kindergarten', 'tower', 'cabin'], 2),
+    ('Elements', array['bathroom', 'bedroom', 'carpet', 'curtain', 'staircase', 'handrail', 'oculus', 'elevated', 'dome', 'bracing', 'pipes', 'electricity', 'building-services', 'slabs', 'gallery', 'hall', 'interior', 'laubengang', 'porch', 'transformation', 'extension', 'balcony', 'ramp', 'roof', 'facade', 'columns', 'courtyard', 'structure', 'door', 'window', 'ceiling', 'floor', 'wall', 'corridor', 'lobby', 'atrium', 'terrace', 'garden', 'garage', 'basement', 'attic', 'elevator', 'escalator', 'beam', 'pillar', 'foundation', 'canopy', 'skylight', 'partition', 'furniture', 'lighting', 'spiral-stair', 'stair', 'sink', 'detail'], 3),
+    ('Material', array['concrete', 'textile', 'glass-bricks', 'corrugated-something', 'chain-link-fence', 'net', 'sand', 'earth', 'plaster', 'stone', 'glass', 'brick', 'clay', 'adobe', 'bamboo', 'thatch', 'straw', 'gravel', 'limestone', 'marble', 'granite', 'slate', 'asphalt', 'tar', 'resin', 'fiberglass', 'carbon-fiber', 'plastic', 'polycarbonate', 'ceramic', 'tile', 'gypsum', 'chalk', 'cork', 'rubber', 'felt', 'wool', 'wood', 'metal'], 4),
+    ('Wer hats mir gezeigt?', array['gta', 'ich-war-da', 'self-photographed'], 5),
+    ('Style', array['brutalism', 'cubic', 'tensioned', 'membran', 'contemporary', 'industrial'], 6),
+    ('Form', array['circular', 'triangular', 'monolithic', 'organic', 'geometric', 'symmetrical'], 7),
+    ('Color', array['colorful', 'grey', 'red', 'orange', 'blue', 'yellow', 'green', 'black', 'white', 'reflective'], 8),
+    ('Other', array['representation', 'in-noisy-places', 'concept', 'circulation', 'experimental', 'self-built', 'temporary'], 9),
     ('Location (country)', countries, 10),
     ('Location (city)', cities, 11),
     ('Location (landscape)', landscapes, 12)
@@ -155,7 +164,7 @@ begin
       union
       select jsonb_array_elements_text(p_new_tags -> category) as tag
     ) all_tags
-    where tag ~ '^[a-z0-9-]+$';
+    where nullif(trim(tag), '') is not null;
 
     insert into public.tag_groups (group_name, tags)
     values (category, coalesce(merged_tags, '{}'::text[]))
@@ -217,7 +226,7 @@ begin
       union
       select jsonb_array_elements_text(p_new_tags -> category) as tag
     ) all_tags
-    where tag ~ '^[a-z0-9-]+$';
+    where nullif(trim(tag), '') is not null;
 
     insert into public.tag_groups (group_name, tags)
     values (category, coalesce(merged_tags, '{}'::text[]))
