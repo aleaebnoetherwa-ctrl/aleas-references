@@ -160,7 +160,7 @@ async function getSupabaseErrorMessage(response) {
 
 function applyReferenceData(data) {
   items = data.items || [];
-  tagGroups = organizeTagGroups(data.tagGroups || {});
+  tagGroups = organizeTagGroups(deduplicateTagGroups(data.tagGroups || {}));
 }
 
 function initializePage() {
@@ -382,6 +382,30 @@ function organizeTagGroups(groups) {
   return organizedGroups;
 }
 
+function deduplicateTagGroups(groups) {
+  const preferredCategories = {
+    interior: "Elements",
+    extension: "Typology"
+  };
+  const normalizedGroups = normalizeTagGroups(groups);
+
+  Object.entries(preferredCategories).forEach(([tag, preferredCategory]) => {
+    Object.keys(normalizedGroups).forEach(category => {
+      if (category === preferredCategory) return;
+
+      const groupData = normalizedGroups[category];
+      if (Array.isArray(groupData) && Array.isArray(groupData[0])) {
+        normalizedGroups[category] = groupData.map(section => section.filter(item => item !== tag));
+        return;
+      }
+
+      normalizedGroups[category] = flattenTags(groupData).filter(item => item !== tag);
+    });
+  });
+
+  return normalizedGroups;
+}
+
 function getLocationSections(groups = tagGroups) {
   const sections = [new Set(), new Set(), new Set()];
   const locationTags = normalizeTagList(flattenTags(groups[LOCATION_GROUP]));
@@ -451,17 +475,19 @@ function initTagSearches() {
   initTagSearch({
     inputId: "filterTagSearch",
     suggestionsId: "filterTagSuggestions",
-    onSelect: selectFilterTag
+    onSelect: selectFilterTag,
+    isSelected: tag => listIncludes(activeTags, tag)
   });
 
   initTagSearch({
     inputId: "submitTagSearch",
     suggestionsId: "submitTagSuggestions",
-    onSelect: selectSubmitTag
+    onSelect: selectSubmitTag,
+    isSelected: tag => selectedSubmitTags.has(tag)
   });
 }
 
-function initTagSearch({ inputId, suggestionsId, onSelect }) {
+function initTagSearch({ inputId, suggestionsId, onSelect, isSelected = () => false }) {
   const input = document.getElementById(inputId);
   const suggestions = document.getElementById(suggestionsId);
   let activeIndex = -1;
@@ -469,18 +495,18 @@ function initTagSearch({ inputId, suggestionsId, onSelect }) {
   if (!input || !suggestions) return;
 
   input.addEventListener("input", () => {
-    activeIndex = renderTagSuggestions(input, suggestions, onSelect);
+    activeIndex = renderTagSuggestions(input, suggestions, onSelect, isSelected);
   });
 
   input.addEventListener("focus", () => {
-    activeIndex = renderTagSuggestions(input, suggestions, onSelect);
+    activeIndex = renderTagSuggestions(input, suggestions, onSelect, isSelected);
   });
 
   input.addEventListener("keydown", (event) => {
     if (event.key === "ArrowDown") {
       event.preventDefault();
       if (!suggestions.classList.contains("open")) {
-        activeIndex = renderTagSuggestions(input, suggestions, onSelect);
+        activeIndex = renderTagSuggestions(input, suggestions, onSelect, isSelected);
       }
       const buttons = [...suggestions.querySelectorAll("button")];
       if (!buttons.length) return;
@@ -491,7 +517,7 @@ function initTagSearch({ inputId, suggestionsId, onSelect }) {
     if (event.key === "ArrowUp") {
       event.preventDefault();
       if (!suggestions.classList.contains("open")) {
-        activeIndex = renderTagSuggestions(input, suggestions, onSelect);
+        activeIndex = renderTagSuggestions(input, suggestions, onSelect, isSelected);
       }
       const buttons = [...suggestions.querySelectorAll("button")];
       if (!buttons.length) return;
@@ -530,7 +556,7 @@ function updateActiveSuggestion(buttons, activeIndex) {
   }
 }
 
-function renderTagSuggestions(input, suggestions, onSelect) {
+function renderTagSuggestions(input, suggestions, onSelect, isSelected = () => false) {
   const query = cleanSearchQuery(input.value);
   suggestions.innerHTML = "";
 
@@ -546,6 +572,7 @@ function renderTagSuggestions(input, suggestions, onSelect) {
   matches.forEach(({ category, tag }) => {
     const button = document.createElement("button");
     button.type = "button";
+    button.classList.toggle("selected", isSelected(tag));
 
     const tagName = document.createElement("span");
     tagName.className = "suggestion-tag";
@@ -609,6 +636,7 @@ function generateGallery() {
     div.className = "item";
     div.dataset.tags = normalizeTagList(item.tags).join(" ");
     div.dataset.id = item.id || "";
+    div.dataset.referenceKey = getReferenceKey(item);
 
     const image = document.createElement("img");
     image.src = item.image;
@@ -633,7 +661,7 @@ function generateGallery() {
     tagPanel.className = "item-tags-panel";
 
     const editButton = document.createElement("button");
-    editButton.className = "item-edit-button";
+    editButton.className = "item-menu-button item-edit-button";
     editButton.type = "button";
     editButton.textContent = "Edit (code only)";
     editButton.addEventListener("click", (event) => {
@@ -717,19 +745,8 @@ function initSubmitForm() {
       return;
     }
 
-    form.reset();
-    selectedSubmitTags.clear();
-    document.querySelectorAll("#submitTagGroups button.selected").forEach(button => {
-      button.classList.remove("selected");
-    });
-    createSubmitTagSelector();
-    resetNewSubmitTags();
-    setSubmitStatus(
-      status,
-      record.status === "approved"
-        ? "Thank you. The reference is approved directly."
-        : "Thank you. The reference will be checked briefly and approved within one day."
-    );
+    window.location.href = "index.html";
+    return;
   });
 }
 
@@ -759,25 +776,49 @@ function initSubmitGuide() {
 }
 
 function initProjectCheckSearch() {
-  const input = document.getElementById("projectCheckSearch");
-  const results = document.getElementById("projectCheckResults");
+  initProjectSearch({
+    inputId: "projectCheckSearch",
+    resultsId: "projectCheckResults",
+    emptyText: "Existing matches will appear here.",
+    mode: "link"
+  });
 
-  if (!input || !results) return;
-
-  renderProjectCheckResults(input.value, results);
-
-  input.addEventListener("input", () => {
-    renderProjectCheckResults(input.value, results);
+  initProjectSearch({
+    inputId: "filterProjectSearch",
+    resultsId: "filterProjectResults",
+    emptyText: "",
+    mode: "jump"
   });
 }
 
-function renderProjectCheckResults(query, results) {
+function initProjectSearch({ inputId, resultsId, emptyText, mode = "link" }) {
+  const input = document.getElementById(inputId);
+  const results = document.getElementById(resultsId);
+
+  if (!input || !results) return;
+
+  renderProjectCheckResults(input.value, results, emptyText, mode);
+
+  input.addEventListener("input", () => {
+    renderProjectCheckResults(input.value, results, emptyText, mode);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (event.target === input || results.contains(event.target)) return;
+    results.classList.remove("open");
+  });
+}
+
+function renderProjectCheckResults(query, results, emptyText = "Existing matches will appear here.", mode = "link") {
   const search = normalizeSearchText(query);
   results.innerHTML = "";
+  results.classList.remove("open");
 
   if (!search) {
+    if (!emptyText) return;
+
     const empty = document.createElement("p");
-    empty.textContent = "Existing matches will appear here.";
+    empty.textContent = emptyText;
     results.appendChild(empty);
     return;
   }
@@ -790,6 +831,7 @@ function renderProjectCheckResults(query, results) {
     const empty = document.createElement("p");
     empty.textContent = "No approved reference found for this search.";
     results.appendChild(empty);
+    results.classList.add("open");
     return;
   }
 
@@ -799,7 +841,9 @@ function renderProjectCheckResults(query, results) {
     const row = document.createElement("li");
     const thumbnail = document.createElement("img");
     const details = document.createElement("div");
-    const title = item.source ? document.createElement("a") : document.createElement("span");
+    const title = mode === "link" && item.source
+      ? document.createElement("a")
+      : document.createElement("span");
     const tags = document.createElement("small");
 
     thumbnail.className = "project-check-thumb";
@@ -812,10 +856,21 @@ function renderProjectCheckResults(query, results) {
 
     title.textContent = item.title || "Untitled reference";
 
-    if (item.source) {
+    if (mode === "link" && item.source) {
       title.href = item.source;
       title.target = "_blank";
       title.rel = "noopener noreferrer";
+    }
+
+    if (mode === "jump") {
+      row.className = "project-jump-result";
+      row.tabIndex = 0;
+      row.addEventListener("click", () => jumpToReference(item, results));
+      row.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        jumpToReference(item, results);
+      });
     }
 
     tags.textContent = normalizeTagList(item.tags).slice(0, 8).join(", ");
@@ -828,6 +883,41 @@ function renderProjectCheckResults(query, results) {
   });
 
   results.appendChild(list);
+  results.classList.add("open");
+}
+
+function jumpToReference(item, results) {
+  const target = findGalleryItem(item);
+
+  if (!target) return;
+
+  if (target.classList.contains("dim")) {
+    resetFilters();
+  }
+
+  if (results) {
+    results.classList.remove("open");
+  }
+
+  target.classList.add("jump-highlight");
+  target.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+  window.setTimeout(() => {
+    target.classList.remove("jump-highlight");
+  }, 1600);
+}
+
+function findGalleryItem(item) {
+  const itemId = String(item.id || "");
+  const itemKey = getReferenceKey(item);
+
+  return [...document.querySelectorAll(".gallery .item")].find(element => {
+    if (itemId && element.dataset.id === itemId) return true;
+    return element.dataset.referenceKey === itemKey;
+  });
 }
 
 function getProjectSearchText(item) {
@@ -898,6 +988,7 @@ function getPromptTagTemplate() {
 function initEditForm(form, status) {
   const referenceId = new URLSearchParams(window.location.search).get("id");
   const code = getStoredEditCode();
+  const duplicateButton = document.getElementById("duplicateReference");
 
   if (!referenceId || code !== EDIT_CODE) {
     setSubmitStatus(status, "Edit code required. Please open this page from the reference menu.");
@@ -915,6 +1006,12 @@ function initEditForm(form, status) {
   }
 
   fillEditForm(reference);
+
+  if (duplicateButton) {
+    duplicateButton.addEventListener("click", () => {
+      duplicateEditedReference(form, status);
+    });
+  }
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -954,6 +1051,45 @@ function initEditForm(form, status) {
 
     setSubmitStatus(status, "Changes saved.");
   });
+}
+
+async function duplicateEditedReference(form, status) {
+  if (!createSupabaseClient()) {
+    setSubmitStatus(status, "Supabase is not configured yet.");
+    return;
+  }
+
+  const formData = new FormData(form);
+  const newTagsByCategory = getNewSubmitTagsByCategory();
+  const newTags = getNewTagValues(newTagsByCategory);
+  const tags = [...new Set([...selectedSubmitTags, ...newTags])];
+
+  const record = {
+    image: getFormValue(formData, "image"),
+    source: getFormValue(formData, "source") || null,
+    title: buildDuplicateSubmitTitle(formData),
+    tags,
+    submitter_name: "alea",
+    status: "approved"
+  };
+
+  if (!record.image || !record.title || record.tags.length === 0) {
+    setSubmitStatus(status, "Please add an image, a title, and at least one tag.");
+    return;
+  }
+
+  setSubmitStatus(status, "Duplicating entry...");
+
+  const { error } = await submitReference(record, newTagsByCategory);
+
+  if (error) {
+    console.error(error);
+    setSubmitStatus(status, error.message || "Duplicating did not work. Please try again later.");
+    return;
+  }
+
+  items.unshift(normalizeReferenceItem(record));
+  setSubmitStatus(status, "Entry duplicated. It will appear twice on the main page.");
 }
 
 function getStoredEditCode() {
@@ -1178,7 +1314,6 @@ function initSubmitFieldSuggestions() {
   setInputDatalist("submitTitleProject", "submitProjectSuggestions", getUniqueValues(
     titleParts.map(part => part.project)
   ));
-  setInputDatalist("submitterName", "submitterNameSuggestions", ["alea"]);
 }
 
 function setInputDatalist(inputId, datalistId, values) {
@@ -1360,6 +1495,28 @@ function buildSubmitTitle(formData) {
   const project = getFormValue(formData, "title_project");
 
   return [author, project].filter(Boolean).join("  —  ");
+}
+
+function buildDuplicateSubmitTitle(formData) {
+  const author = getFormValue(formData, "title_author");
+  const project = getFormValue(formData, "title_project");
+  const image = getFormValue(formData, "image");
+  const source = getFormValue(formData, "source");
+  const baseProject = project.replace(/\s+kopie\d+$/i, "").trim() || project;
+  const existingTitles = items
+    .filter(item => String(item.image || "") === image)
+    .filter(item => String(item.source || "") === source)
+    .map(item => item.title);
+
+  for (let index = 1; index < 1000; index += 1) {
+    const duplicateTitle = [author, `${baseProject} kopie${index}`].filter(Boolean).join("  —  ");
+
+    if (!listIncludes(existingTitles, duplicateTitle)) {
+      return duplicateTitle;
+    }
+  }
+
+  return [author, `${baseProject} kopie${Date.now()}`].filter(Boolean).join("  —  ");
 }
 
 function splitReferenceTitle(title) {

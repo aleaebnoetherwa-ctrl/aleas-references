@@ -500,23 +500,23 @@ title: "Buchner Bründler  —  Stadterle Basel",
 ========================= */
 
 tagGroups: {
-  "Author": ["vaccaro-giuseppe", "sauerbruch-hutton", "mosso-nicola-leonardo", "christ-gantenbein", "smithson-alison-peter", "mies-van-der-rohe-ludwig", "loos-adolf", "kerez-christian", "zumthor-peter", "dorval-bory-nicolas", "archigram", "libera-adalberto", "deplazes-bearth", "rogers-richard", "r-architecture", "vernacular", "bruther", "baukunst", "enzmann-fischer-partner", "buchner-bruendler", "sauerbruch-hutton", "olgiati-valerio", "maerkli-peter", "lacaton-vassal", "matta-clark-gordon", "matte-trucco", "piano-renzo", "de-vylder-vinck-taillieu", "tschumi-bernard", "exner-inger-johannes", "127af", "le-corbusier", "herbst-rene"],
+  "Author": ["vaccaro-giuseppe", "sauerbruch-hutton", "mosso-nicola-leonardo", "christ-gantenbein", "smithson-alison-peter", "mies-van-der-rohe-ludwig", "loos-adolf", "kerez-christian", "zumthor-peter", "dorval-bory-nicolas", "archigram", "libera-adalberto", "deplazes-bearth", "rogers-richard", "r-architecture", "vernacular", "bruther", "baukunst", "enzmann-fischer-partner", "buchner-bruendler", "olgiati-valerio", "maerkli-peter", "lacaton-vassal", "matta-clark-gordon", "matte-trucco", "piano-renzo", "de-vylder-vinck-taillieu", "tschumi-bernard", "exner-inger-johannes", "127af", "le-corbusier", "herbst-rene"],
 
   "Location": [
     ["france", "uk", "italy", "usa", "germany", "denmark", "belgium", "switzerland"],
-    ["paris", "berlin", "vienna", "zurich", "bordeaux", "prague", "basel", "berlin", "turin"],
+    ["paris", "berlin", "vienna", "zurich", "bordeaux", "prague", "basel", "turin"],
     ["coast", "mountains", "desert", "forest"]
   ],
 
-  "Typology": ["church", "extension", "interior", "student-housing", "parking", "alternative-living", "mixed-use", "office", "house", "social-housing", "housing", "factory", "museum", "park", "pavilion", "kindergarten", "tower", "cabin"],
+  "Typology": ["church", "extension", "student-housing", "parking", "alternative-living", "mixed-use", "office", "house", "social-housing", "housing", "factory", "museum", "park", "pavilion", "kindergarten", "tower", "cabin"],
 
-  "Elements": ["bathroom", "bedroom", "carpet", "curtain", "staircase", "handrail", "oculus", "elevated", "dome", "bracing", "pipes", "electricity", "building-services", "slabs", "gallery", "hall", "interior", "laubengang", "porch", "transformation", "extension", "balcony", "ramp", "roof", "facade", "columns", "courtyard", "structure", "door", "window", "ceiling", "floor", "wall", "corridor", "lobby", "atrium", "terrace", "garden", "garage", "basement", "attic", "elevator", "escalator", "handrail", "beam", "pillar", "foundation", "canopy", "skylight", "partition", "furniture", "lighting", "spiral-stair", "stair", "sink", "detail"],
+  "Elements": ["bathroom", "bedroom", "carpet", "curtain", "staircase", "handrail", "oculus", "elevated", "dome", "bracing", "pipes", "electricity", "building-services", "slabs", "gallery", "hall", "interior", "laubengang", "porch", "transformation", "balcony", "ramp", "roof", "facade", "columns", "courtyard", "structure", "door", "window", "ceiling", "floor", "wall", "corridor", "lobby", "atrium", "terrace", "garden", "garage", "basement", "attic", "elevator", "escalator", "beam", "pillar", "foundation", "canopy", "skylight", "partition", "furniture", "lighting", "spiral-stair", "stair", "sink", "detail"],
 
   "Material": ["concrete", "textile", "glass-bricks", "corrugated-something", "chain-link-fence", "net", "sand", "earth", "plaster", "stone", "glass", "brick", "clay", "adobe", "bamboo", "thatch", "straw", "gravel", "limestone", "marble", "granite", "slate", "asphalt", "tar", "resin", "fiberglass", "carbon-fiber", "plastic", "polycarbonate", "ceramic", "tile", "gypsum", "chalk", "cork", "rubber", "felt", "wool", "wood", "metal"],
 
   "Wer hats mir gezeigt?": ["gta", "ich-war-da", "self-photographed"],
 
-  "Style": ["brutalism", "cubic", "tensioned", "membran", "contemporary", "cubic", "industrial"],
+  "Style": ["brutalism", "cubic", "tensioned", "membran", "contemporary", "industrial"],
 
   "Form": ["circular", "triangular", "monolithic", "organic", "geometric", "symmetrical"],
 

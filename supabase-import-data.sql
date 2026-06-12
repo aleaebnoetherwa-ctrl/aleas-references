@@ -11,8 +11,8 @@ insert into public.tag_groups (group_name, tags, sort_order)
 values
   ('Author', array['vaccaro-giuseppe', 'sauerbruch-hutton', 'mosso-nicola-leonardo', 'christ-gantenbein', 'smithson-alison-peter', 'mies-van-der-rohe-ludwig', 'loos-adolf', 'kerez-christian', 'zumthor-peter', 'dorval-bory-nicolas', 'archigram', 'libera-adalberto', 'deplazes-bearth', 'rogers-richard', 'r-architecture', 'vernacular', 'bruther', 'baukunst', 'enzmann-fischer-partner', 'buchner-bruendler', 'olgiati-valerio', 'maerkli-peter', 'lacaton-vassal', 'matta-clark-gordon', 'matte-trucco', 'piano-renzo', 'de-vylder-vinck-taillieu', 'tschumi-bernard', 'exner-inger-johannes', '127af', 'le-corbusier', 'herbst-rene']::text[], 0),
   ('Location', array['france', 'uk', 'italy', 'usa', 'germany', 'denmark', 'belgium', 'switzerland', 'paris', 'berlin', 'vienna', 'zurich', 'bordeaux', 'prague', 'basel', 'turin', 'coast', 'mountains', 'desert', 'forest']::text[], 1),
-  ('Typology', array['church', 'extension', 'interior', 'student-housing', 'parking', 'alternative-living', 'mixed-use', 'office', 'house', 'social-housing', 'housing', 'factory', 'museum', 'park', 'pavilion', 'kindergarten', 'tower', 'cabin']::text[], 2),
-  ('Elements', array['bathroom', 'bedroom', 'carpet', 'curtain', 'staircase', 'handrail', 'oculus', 'elevated', 'dome', 'bracing', 'pipes', 'electricity', 'building-services', 'slabs', 'gallery', 'hall', 'interior', 'laubengang', 'porch', 'transformation', 'extension', 'balcony', 'ramp', 'roof', 'facade', 'columns', 'courtyard', 'structure', 'door', 'window', 'ceiling', 'floor', 'wall', 'corridor', 'lobby', 'atrium', 'terrace', 'garden', 'garage', 'basement', 'attic', 'elevator', 'escalator', 'beam', 'pillar', 'foundation', 'canopy', 'skylight', 'partition', 'furniture', 'lighting', 'spiral-stair', 'stair', 'sink', 'detail']::text[], 3),
+  ('Typology', array['church', 'extension', 'student-housing', 'parking', 'alternative-living', 'mixed-use', 'office', 'house', 'social-housing', 'housing', 'factory', 'museum', 'park', 'pavilion', 'kindergarten', 'tower', 'cabin']::text[], 2),
+  ('Elements', array['bathroom', 'bedroom', 'carpet', 'curtain', 'staircase', 'handrail', 'oculus', 'elevated', 'dome', 'bracing', 'pipes', 'electricity', 'building-services', 'slabs', 'gallery', 'hall', 'interior', 'laubengang', 'porch', 'transformation', 'balcony', 'ramp', 'roof', 'facade', 'columns', 'courtyard', 'structure', 'door', 'window', 'ceiling', 'floor', 'wall', 'corridor', 'lobby', 'atrium', 'terrace', 'garden', 'garage', 'basement', 'attic', 'elevator', 'escalator', 'beam', 'pillar', 'foundation', 'canopy', 'skylight', 'partition', 'furniture', 'lighting', 'spiral-stair', 'stair', 'sink', 'detail']::text[], 3),
   ('Material', array['concrete', 'textile', 'glass-bricks', 'corrugated-something', 'chain-link-fence', 'net', 'sand', 'earth', 'plaster', 'stone', 'glass', 'brick', 'clay', 'adobe', 'bamboo', 'thatch', 'straw', 'gravel', 'limestone', 'marble', 'granite', 'slate', 'asphalt', 'tar', 'resin', 'fiberglass', 'carbon-fiber', 'plastic', 'polycarbonate', 'ceramic', 'tile', 'gypsum', 'chalk', 'cork', 'rubber', 'felt', 'wool', 'wood', 'metal']::text[], 4),
   ('Wer hats mir gezeigt?', array['gta', 'ich-war-da', 'self-photographed']::text[], 5),
   ('Style', array['brutalism', 'cubic', 'tensioned', 'membran', 'contemporary', 'industrial']::text[], 6),
@@ -26,6 +26,21 @@ do update set
     from unnest(public.tag_groups.tags || excluded.tags) as tag
   ),
   sort_order = excluded.sort_order;
+
+update public.tag_groups
+set tags = array_remove(tags, 'interior')
+where group_name = 'Typology';
+
+update public.tag_groups
+set tags = array_remove(tags, 'extension')
+where group_name = 'Elements';
+
+update public.tag_groups
+set tags = (
+  select array_agg(distinct tag order by tag)
+  from unnest(public.tag_groups.tags) as tag
+)
+where tags is not null;
 
 insert into public.references (image, source, title, tags, status)
 values
